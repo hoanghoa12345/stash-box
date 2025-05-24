@@ -1,7 +1,7 @@
 import { DOMParser, Element } from "../config/deps.ts";
 
-export default {
-  getMetaTags: async (url: string) => {
+class MetaTagService {
+  public static async getMetaTags(url: string) {
     const headers = new Headers();
     headers.set("accept", "text/html,application/xhtml+xml,application/xml");
     headers.set(
@@ -29,5 +29,7 @@ export default {
     documentMeta.title ??= document.querySelector("title").textContent;
 
     return documentMeta;
-  },
-};
+  }
+}
+
+export default MetaTagService;

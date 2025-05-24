@@ -1,9 +1,11 @@
+import AuthService from "../services/AuthService.ts";
 import MetaTagService from "../services/MetaTagService.ts";
-import { logSuccess } from "../utils/logger.ts";
+import { log, logSuccess } from "../utils/logger.ts";
 import { response } from "../utils/response.ts";
+import { Context } from "../config/deps.ts";
 
-export default {
-  get_info: async (ctx) => {
+class MetaTagController {
+  static async get_info(ctx: Context) {
     const urlParams = new URLSearchParams(ctx.request.url.search);
     const urlValue = urlParams.get("url");
     if (!urlValue) {
@@ -18,5 +20,15 @@ export default {
       response(ctx, 500, "Internal server error", error);
       return;
     }
-  },
-};
+  }
+  static async create(ctx: Context) {
+    try {
+      response(ctx, 200, "Create meta tags successful!");
+    } catch (error) {
+      response(ctx, 500, "Internal server error", error);
+      return;
+    }
+  }
+}
+
+export default MetaTagController;
