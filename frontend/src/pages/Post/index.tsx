@@ -7,14 +7,32 @@ import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ArrowLeft, Save, X, Eye, Clock } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import PostService from "@/services/PostService"
+import { ICollection } from "@/types"
+import CollectionService from "@/services/CollectionService"
+import { toast } from "sonner"
+
+const unCategorizedCollection: ICollection = {
+  id: null,
+  name: "Uncategorized",
+  created_at: new Date().toISOString(),
+  user_id: "",
+  parent_id: null,
+  icon: "📂",
+  updated_at: new Date().toISOString(),
+  deleted_at: null
+}
 
 export default function PostDetail() {
   const [title, setTitle] = useState("")
   const [content, setContent] = useState("")
   const [isDirty, setIsDirty] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [collections, setCollections] = useState<ICollection[]>([])
+  const [selectedCollection, setSelectedCollection] =
+    useState<ICollection | null>(null)
   const navigate = useNavigate()
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -28,20 +46,28 @@ export default function PostDetail() {
   }
 
   const handleSave = async () => {
-    // Handle save logic here
-    console.log("Saving post:", { title, content })
     setIsDirty(false)
-    const result = await PostService.createPost({
-      title: title.trim(),
-      content: content.trim()
-    })
-    // if (result.error) {
-    //   console.error("Error saving post:", result.error)
-    //   alert("Failed to save post. Please try again.")
-    //   return
-    // }
-    console.log("Post saved successfully:", result.data)
-    // You could redirect to dashboard or show success message
+    try {
+      await PostService.createPost({
+        title: title.trim(),
+        content: content.trim(),
+        collectionId: selectedCollection?.id || null
+      })
+      toast.success("Post saved successfully")
+      // clear fields after saving
+      setTitle("")
+      setContent("")
+      setSelectedCollection(null)
+      // Navigate back to dashboard or posts list
+      navigate("/")
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error(error.message)
+      } else {
+        toast.error("An unknown error occurred while saving the post")
+      }
+      return
+    }
   }
 
   const handleCancel = () => {
@@ -57,6 +83,25 @@ export default function PostDetail() {
     navigate("/")
   }
 
+  const getCollections = async () => {
+    try {
+      setIsLoading(true)
+      const response = await CollectionService.getCollections({
+        offset: -1,
+        limit: 50
+      })
+      setCollections([unCategorizedCollection, ...response.data])
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error(error.message)
+      } else {
+        toast.error("An unknown error occurred while fetching collections")
+      }
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   const handlePreview = () => {
     // Handle preview logic here
     console.log("Opening preview")
@@ -67,6 +112,10 @@ export default function PostDetail() {
     .split(/\s+/)
     .filter((word) => word.length > 0).length
   const charCount = content.length
+
+  useEffect(() => {
+    getCollections()
+  }, [])
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -101,11 +150,7 @@ export default function PostDetail() {
                 <X className="h-4 w-4 mr-2" />
                 Cancel
               </Button>
-              <Button
-                size="sm"
-                onClick={handleSave}
-                disabled={!title.trim() || !content.trim()}
-              >
+              <Button size="sm" onClick={handleSave} disabled={!content.trim()}>
                 <Save className="h-4 w-4 mr-2" />
                 Save Post
               </Button>
@@ -139,6 +184,37 @@ export default function PostDetail() {
               </p>
             </div>
 
+            {/* Additional Options */}
+            <div className="border-t pt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="category" className="text-sm font-medium">
+                    Category
+                  </Label>
+                  <select
+                    id="category"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    onChange={(e) => {
+                      setSelectedCollection(
+                        collections.find(
+                          (collection) => collection.id === e.target.value
+                        ) || null
+                      )
+                      setIsDirty(true)
+                    }}
+                    defaultValue={unCategorizedCollection.id || ""}
+                    disabled={isLoading}
+                  >
+                    {collections.map((collection) => (
+                      <option key={collection.id} value={collection.id || ""}>
+                        {collection.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+
             {/* Content Field */}
             <div className="space-y-2">
               <Label htmlFor="content" className="text-base font-medium">
@@ -159,39 +235,6 @@ export default function PostDetail() {
                 </div>
               </div>
             </div>
-
-            {/* Additional Options */}
-            <div className="border-t pt-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="category" className="text-sm font-medium">
-                    Category
-                  </Label>
-                  <select
-                    id="category"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="">Select a category</option>
-                    <option value="design">Design</option>
-                    <option value="development">Development</option>
-                    <option value="documentation">Documentation</option>
-                    <option value="marketing">Marketing</option>
-                    <option value="research">Research</option>
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="tags" className="text-sm font-medium">
-                    Tags
-                  </Label>
-                  <Input
-                    id="tags"
-                    type="text"
-                    placeholder="Add tags separated by commas"
-                    className="text-sm"
-                  />
-                </div>
-              </div>
-            </div>
           </CardContent>
         </Card>
 
@@ -199,7 +242,7 @@ export default function PostDetail() {
         <div className="mt-6 flex flex-col sm:flex-row gap-3 sm:hidden">
           <Button
             onClick={handleSave}
-            disabled={!title.trim() || !content.trim()}
+            disabled={!content.trim()}
             className="w-full"
           >
             <Save className="h-4 w-4 mr-2" />

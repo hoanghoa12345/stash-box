@@ -51,7 +51,6 @@ const AppSidebar = ({
       return
     }
     const result = await CollectionService.createCollection(name, emoji)
-    console.log("Create collection result:", result)
     if (result) {
       toast.success("Collection created successfully")
       setIsCreateModalOpen(false)

@@ -1,6 +1,6 @@
 import { ICollection } from "@/types"
 import { SidebarMenuButton, SidebarMenuItem } from "../ui/sidebar"
-// import { Badge } from "../ui/badge"
+import { Badge } from "../ui/badge"
 
 type SidebarItemProps = {
   collection: ICollection
@@ -20,9 +20,9 @@ const SidebarItem = ({ collection, onClick, isActive }: SidebarItemProps) => {
           {collection.icon || "📄"}
         </div>
         <span className="flex-1">{collection.name}</span>
-        {/* <Badge variant="secondary" className="ml-auto">
-          {collection.count || 0}
-        </Badge> */}
+        <Badge variant="secondary" className="ml-auto">
+          {collection.total_posts || 0}
+        </Badge>
       </SidebarMenuButton>
     </SidebarMenuItem>
   )

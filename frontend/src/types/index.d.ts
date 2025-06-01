@@ -49,6 +49,7 @@ export interface Post {
   type: number
   order: number
   deleted_at: string | null
+  collection_name?: string
 }
 
 export interface ICollection {
@@ -60,6 +61,7 @@ export interface ICollection {
   icon: string
   updated_at: string
   deleted_at: string | null
+  total_posts?: number
 }
 
 export interface PostCreateData {

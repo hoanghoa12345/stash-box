@@ -1,6 +1,7 @@
 import { Pool } from "../config/deps.ts";
 import { log } from "../utils/logger.ts";
 import { PostType, PostUpdate, type Post } from "../models/Post.ts";
+import MetaTagService from "./MetaTagService.ts";
 
 const databaseUrl = Deno.env.get("SUPABASE_DB_URL") ?? "";
 
@@ -16,7 +17,9 @@ class PostService {
     limit: number = 50
   ) {
     const connection = await this.pool.connect();
-    let query = "SELECT * FROM posts WHERE user_id = $USER_ID";
+    let query = `SELECT p.id, p.user_id, title, SUBSTRING("content" FROM 1 FOR 200) AS "content", image_url, link, collection_id,
+      p.created_at, p.updated_at, "type", "order", c."name" as "collection_name" FROM posts AS p
+      LEFT JOIN collections AS c ON p.collection_id = c.id WHERE p.user_id = $USER_ID`;
     const params: any = { user_id: userId };
 
     if (collectionId) {
@@ -33,7 +36,7 @@ class PostService {
       params.filter = `%${filter}%`;
     }
 
-    query += " AND deleted_at IS NULL";
+    query += " AND p.deleted_at IS NULL";
     query += " ORDER BY created_at DESC";
 
     if (offset >= 0) {
@@ -76,12 +79,18 @@ class PostService {
       )
       .then((res) => res.rows[0]["?column?"] || 0);
 
-    const { type, title: computedTitle } = await this.computePostData(
-      title,
-      content
-    );
+    const {
+      type,
+      title: computedTitle,
+      content: computedContent,
+      link: computedLink,
+      image_url,
+    } = await this.computePostData(title, content);
     post.type = type;
     post.title = computedTitle;
+    post.content = computedContent;
+    post.link = computedLink;
+    post.image_url = image_url || null;
 
     const query = `INSERT INTO posts (user_id, title, content, collection_id, created_at, updated_at, image_url, link, type, "order") 
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`;
@@ -178,10 +187,25 @@ class PostService {
 
     log(`Extracted URL: ${url}`);
 
+    if (!url) {
+      return {
+        type: PostType.POST_TYPE_TEXT,
+        title: title,
+      };
+    }
+
+    const metatags = await MetaTagService.getMetaTags(url);
+
     return {
-      type:
-        matches.length > 0 ? PostType.POST_TYPE_LINK : PostType.POST_TYPE_TEXT,
-      title: title,
+      type: PostType.POST_TYPE_LINK,
+      title: metatags?.title || metatags?.["og:title"] || title,
+      content:
+        metatags?.description ||
+        metatags?.["og:description"] ||
+        metatags?.["twitter:description"] ||
+        content,
+      link: metatags?.["og:url"] || url,
+      image_url: metatags?.["og:image"] || metatags?.["twitter:image"] || null,
     };
   }
 }

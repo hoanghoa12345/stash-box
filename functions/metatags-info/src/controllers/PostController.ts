@@ -46,8 +46,8 @@ class PostController {
       const jsonBody = await body.json();
       const { title, content, collectionId, imageUrl, link } = jsonBody;
 
-      if (!title || !content) {
-        response(ctx, 400, "Title and content are required");
+      if (!content) {
+        response(ctx, 400, "Content is required");
         return;
       }
 

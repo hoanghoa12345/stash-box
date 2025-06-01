@@ -1,4 +1,3 @@
-import { createClient, SupabaseClient } from "../config/deps.ts";
 import {
   Collection,
   CollectionCreate,
@@ -19,20 +18,30 @@ class CollectionService {
     limit: number = 50
   ) {
     const connection = await this.pool.connect();
-    let query =
-      "SELECT * FROM collections WHERE user_id = $1 AND deleted_at IS NULL";
+    let query = `SELECT c.id, c.name, c.parent_id, c.icon, c.updated_at, COUNT(p.id) AS total_posts 
+        FROM collections c LEFT JOIN posts p ON c.id=p.collection_id 
+        WHERE c.user_id=$1 AND c.deleted_at IS NULL GROUP BY c.id, c.name`;
     const params: unknown[] = [userId];
 
     if (offset >= 0) {
-      query += " ORDER BY created_at DESC OFFSET $2 LIMIT $3";
+      query += " ORDER BY c.created_at DESC OFFSET $2 LIMIT $3";
       params.push(offset, limit);
     } else {
-      query += " ORDER BY created_at DESC LIMIT $2";
+      query += " ORDER BY c.created_at DESC LIMIT $2";
       params.push(limit);
     }
 
     const result = await connection.queryObject<Collection>(query, params);
     connection.release();
+
+    result.rows.forEach((collection) => {
+      collection.icon = collection.icon || "📂";
+      collection.parent_id = collection.parent_id || null;
+      collection.updated_at = collection.updated_at || new Date().toISOString();
+      collection.total_posts =
+        parseInt(collection.total_posts as unknown as string, 10) || 0;
+      collection.created_at = collection.created_at || new Date().toISOString();
+    });
 
     return result.rows;
   }
