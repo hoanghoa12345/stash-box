@@ -1,9 +1,9 @@
 import Collection from "@/pages/Collection"
 import Login from "@/pages/Login"
 import PostDetail from "@/pages/Post"
-import { createBrowserRouter } from "react-router-dom"
+import { createHashRouter } from "react-router-dom"
 
-const router = createBrowserRouter(
+const router = createHashRouter(
   [
     {
       index: true,

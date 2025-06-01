@@ -21,7 +21,13 @@ type LinkCardProps = {
   onClick?: () => void
 }
 
-const LinkCard = ({ card, onClick }: LinkCardProps) => {
+const LinkCard = ({ card }: LinkCardProps) => {
+  const handleOpenLink = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (card.link) {
+      window.open(card.link, "_blank", "noopener,noreferrer")
+    }
+  }
   return (
     <>
       <Card
@@ -97,6 +103,7 @@ const LinkCard = ({ card, onClick }: LinkCardProps) => {
                   variant="ghost"
                   size="sm"
                   className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={handleOpenLink}
                 >
                   <ExternalLink className="h-4 w-4" />
                   <span className="sr-only">Visit {card.link}</span>
