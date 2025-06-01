@@ -1,1 +1,1 @@
-# Supabase Edge Functions
+# Stash Box

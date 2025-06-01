@@ -9,6 +9,20 @@ import { response } from "../utils/response.ts";
 import { log, logErr } from "../utils/logger.ts";
 
 class CollectionController {
+  public static async index(ctx: Context) {
+    const userId = ctx.state.user.id;
+    const searchParams = new URLSearchParams(ctx.request.url.search);
+    const offset = parseInt(searchParams.get("offset") || "-1", 10);
+    const limit = parseInt(searchParams.get("limit") || "50", 10);
+
+    try {
+      const data = await CollectionService.all(userId, offset, limit);
+      response(ctx, 200, "Collections retrieved successfully!", data);
+    } catch (error) {
+      logErr(error);
+      response(ctx, 500, "Internal server error", error);
+    }
+  }
   public static async store(ctx: Context) {
     const body = ctx.request.body;
     try {

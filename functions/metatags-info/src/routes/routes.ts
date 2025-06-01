@@ -14,9 +14,11 @@ const router = new Router({
 router.get("/meta", MetaTagController.get_info);
 
 router.post("/__sign_up_user", AuthController.signUp);
-router.post("/__sign_in_user", AuthController.signIn);
-router.get("/__get_user", auth, AuthController.getUser);
+router.post("/sign-in", AuthController.signIn);
+router.get("/user", auth, AuthController.getUser);
+router.post("/sign-out", auth, AuthController.signOut);
 
+router.get("/collections", auth, CollectionController.index);
 router.post("/collections", auth, CollectionController.store);
 router.get("/collections/:collection_id", auth, CollectionController.get);
 router.put("/collections", auth, CollectionController.update);

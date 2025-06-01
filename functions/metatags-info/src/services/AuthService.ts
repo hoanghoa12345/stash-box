@@ -25,6 +25,9 @@ class AuthService {
       password,
     });
   }
+  public static signOut() {
+    return this.supabaseClient.auth.signOut();
+  }
 }
 
 export default AuthService;

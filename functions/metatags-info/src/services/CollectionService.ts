@@ -13,6 +13,30 @@ const databaseUrl = Deno.env.get("SUPABASE_DB_URL") ?? "";
 class CollectionService {
   private static pool = new Pool(databaseUrl, 3, true);
 
+  public static async all(
+    userId: string,
+    offset: number = -1,
+    limit: number = 50
+  ) {
+    const connection = await this.pool.connect();
+    let query =
+      "SELECT * FROM collections WHERE user_id = $1 AND deleted_at IS NULL";
+    const params: unknown[] = [userId];
+
+    if (offset >= 0) {
+      query += " ORDER BY created_at DESC OFFSET $2 LIMIT $3";
+      params.push(offset, limit);
+    } else {
+      query += " ORDER BY created_at DESC LIMIT $2";
+      params.push(limit);
+    }
+
+    const result = await connection.queryObject<Collection>(query, params);
+    connection.release();
+
+    return result.rows;
+  }
+
   public static async show(id: string) {
     const connection = await this.pool.connect();
     const result = await connection.queryObject<Collection>(

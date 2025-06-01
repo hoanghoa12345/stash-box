@@ -71,6 +71,22 @@ class AuthController {
   public static async getUser(ctx: Context) {
     response(ctx, 200, "Get user successful!", ctx.state.user);
   }
+
+  public static async signOut(ctx: Context) {
+    try {
+      const { error } = await AuthService.signOut();
+      if (error) {
+        logErr(error);
+        response(ctx, 400, error.message);
+        return;
+      }
+      response(ctx, 200, "Sign out successful!");
+    } catch (error) {
+      logErr(error);
+      response(ctx, 500, "Internal server error", error);
+      return;
+    }
+  }
 }
 
 export default AuthController;
