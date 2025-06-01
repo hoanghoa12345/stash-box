@@ -25,9 +25,6 @@ class PostService {
     axios.defaults.baseURL = this.apiUrl
     axios.defaults.headers.common["Authorization"] = `Bearer ${this.authToken}`
     this.userAuthorization = Cookies.get("access_token") || null
-    if (!this.userAuthorization) {
-      throw new Error("User is not authenticated")
-    }
     axios.defaults.headers.common["X-User-Authorization"] =
       `Bearer ${this.userAuthorization}`
   }
