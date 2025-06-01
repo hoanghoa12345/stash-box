@@ -1,10 +1,12 @@
-import { DataResponse, Post } from "@/types"
+import { DataResponse, Post, PostCreateData } from "@/types"
 import axios from "axios"
+import Cookies from "js-cookie"
 
 class PostService {
   private static instance: PostService
   private apiUrl: string
   private authToken: string | null = null
+  private userAuthorization: string | null = null
 
   private constructor() {
     this.apiUrl = import.meta.env.VITE_API_URL
@@ -22,6 +24,12 @@ class PostService {
   private initializeAxios(): void {
     axios.defaults.baseURL = this.apiUrl
     axios.defaults.headers.common["Authorization"] = `Bearer ${this.authToken}`
+    this.userAuthorization = Cookies.get("access_token") || null
+    if (!this.userAuthorization) {
+      throw new Error("User is not authenticated")
+    }
+    axios.defaults.headers.common["X-User-Authorization"] =
+      `Bearer ${this.userAuthorization}`
   }
 
   public async getPosts({
@@ -46,7 +54,9 @@ class PostService {
     return response.data
   }
 
-  public async createPost(postData: any): Promise<any> {
+  public async createPost(
+    postData: PostCreateData
+  ): Promise<DataResponse<Post>> {
     const response = await axios.post("/posts", postData)
     if (response.status !== 201) {
       throw new Error("Failed to create post")

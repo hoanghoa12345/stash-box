@@ -70,11 +70,11 @@ class PostService {
     };
 
     post.order = await connection
-      .queryObject<number>(
-        "SELECT COALESCE(MAX(order), 0) + 1 FROM posts WHERE user_id = $1 AND collection_id = $2",
+      .queryObject<{ order: { "?column?": number } }>(
+        `SELECT COALESCE(MAX("order"), 0) + 1 FROM posts WHERE user_id = $1 AND collection_id = $2`,
         [userId, collectionId]
       )
-      .then((res) => res.rows[0] || 0);
+      .then((res) => res.rows[0]["?column?"] || 0);
 
     const { type, title: computedTitle } = await this.computePostData(
       title,
@@ -83,22 +83,23 @@ class PostService {
     post.type = type;
     post.title = computedTitle;
 
-    const result = await connection.queryObject<Post>(
-      `INSERT INTO posts (user_id, title, content, collection_id, created_at, updated_at, image_url, link, type, order) 
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
-      [
-        post.user_id,
-        post.title,
-        post.content,
-        post.collection_id,
-        post.created_at,
-        post.updated_at,
-        post.image_url,
-        post.link,
-        post.type,
-        post.order,
-      ]
-    );
+    const query = `INSERT INTO posts (user_id, title, content, collection_id, created_at, updated_at, image_url, link, type, "order") 
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`;
+
+    const params = [
+      post.user_id,
+      post.title,
+      post.content,
+      post.collection_id,
+      post.created_at,
+      post.updated_at,
+      post.image_url,
+      post.link,
+      post.type,
+      post.order,
+    ];
+
+    const result = await connection.queryObject<Post>(query, params);
     connection.release();
 
     if (result.rows.length === 0) {

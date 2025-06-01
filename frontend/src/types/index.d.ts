@@ -61,3 +61,11 @@ export interface ICollection {
   updated_at: string
   deleted_at: string | null
 }
+
+export interface PostCreateData {
+  title: string
+  content: string
+  collectionId?: string | null
+  imageUrl?: string | null
+  link?: string | null
+}

@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { ArrowLeft, Save, X, Eye, Clock } from "lucide-react"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
+import PostService from "@/services/PostService"
 
 export default function PostDetail() {
   const [title, setTitle] = useState("")
@@ -26,10 +27,20 @@ export default function PostDetail() {
     setIsDirty(true)
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     // Handle save logic here
     console.log("Saving post:", { title, content })
     setIsDirty(false)
+    const result = await PostService.createPost({
+      title: title.trim(),
+      content: content.trim()
+    })
+    // if (result.error) {
+    //   console.error("Error saving post:", result.error)
+    //   alert("Failed to save post. Please try again.")
+    //   return
+    // }
+    console.log("Post saved successfully:", result.data)
     // You could redirect to dashboard or show success message
   }
 
