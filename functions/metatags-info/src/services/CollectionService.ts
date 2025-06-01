@@ -19,7 +19,7 @@ class CollectionService {
   ) {
     const connection = await this.pool.connect();
     let query = `SELECT c.id, c.name, c.parent_id, c.icon, c.updated_at, COUNT(p.id) AS total_posts 
-        FROM collections c LEFT JOIN posts p ON c.id=p.collection_id 
+        FROM sb_collections c LEFT JOIN sb_posts p ON c.id=p.collection_id 
         WHERE c.user_id=$1 AND c.deleted_at IS NULL GROUP BY c.id, c.name`;
     const params: unknown[] = [userId];
 
@@ -49,7 +49,7 @@ class CollectionService {
   public static async show(id: string) {
     const connection = await this.pool.connect();
     const result = await connection.queryObject<Collection>(
-      "SELECT * FROM collections WHERE id = $1",
+      "SELECT * FROM sb_collections WHERE id = $1",
       [id]
     );
     connection.release();
@@ -72,7 +72,7 @@ class CollectionService {
     const connection = await this.pool.connect();
 
     const result = await connection.queryObject<Collection>(
-      "INSERT INTO collections (user_id, name, created_at, parent_id, icon) VALUES ($1, $2, $3, $4, $5) RETURNING *",
+      "INSERT INTO sb_collections (user_id, name, created_at, parent_id, icon) VALUES ($1, $2, $3, $4, $5) RETURNING *",
       [
         data.userId,
         data.name,
@@ -93,7 +93,7 @@ class CollectionService {
   public static async update(data: CollectionUpdate) {
     const connection = await this.pool.connect();
     const query = `
-      UPDATE collections
+      UPDATE sb_collections
       SET name = $1, parent_id = $2, icon = $3
       WHERE id = $4 AND user_id = $5
       RETURNING *
@@ -117,7 +117,7 @@ class CollectionService {
   public static async delete(data: CollectionDelete) {
     const connection = await this.pool.connect();
     let query =
-      "UPDATE collections SET deleted_at = NOW() WHERE id = $1 AND user_id = $2";
+      "UPDATE sb_collections SET deleted_at = NOW() WHERE id = $1 AND user_id = $2";
     const params = [data.id, data.userId];
     if (data.isNested) {
       query += " OR parent_id = $3";

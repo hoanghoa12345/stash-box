@@ -18,8 +18,8 @@ class PostService {
   ) {
     const connection = await this.pool.connect();
     let query = `SELECT p.id, p.user_id, title, SUBSTRING("content" FROM 1 FOR 200) AS "content", image_url, link, collection_id,
-      p.created_at, p.updated_at, "type", "order", c."name" as "collection_name" FROM posts AS p
-      LEFT JOIN collections AS c ON p.collection_id = c.id WHERE p.user_id = $USER_ID`;
+      p.created_at, p.updated_at, "type", "order", c."name" as "collection_name" FROM sb_posts AS p
+      LEFT JOIN sb_collections AS c ON p.collection_id = c.id WHERE p.user_id = $USER_ID`;
     const params: any = { user_id: userId };
 
     if (collectionId) {
@@ -74,7 +74,7 @@ class PostService {
 
     post.order = await connection
       .queryObject<{ order: { "?column?": number } }>(
-        `SELECT COALESCE(MAX("order"), 0) + 1 FROM posts WHERE user_id = $1 AND collection_id = $2`,
+        `SELECT COALESCE(MAX("order"), 0) + 1 FROM sb_posts WHERE user_id = $1 AND collection_id = $2`,
         [userId, collectionId]
       )
       .then((res) => res.rows[0]["?column?"] || 0);
@@ -92,7 +92,7 @@ class PostService {
     post.link = computedLink;
     post.image_url = image_url || null;
 
-    const query = `INSERT INTO posts (user_id, title, content, collection_id, created_at, updated_at, image_url, link, type, "order") 
+    const query = `INSERT INTO sb_posts (user_id, title, content, collection_id, created_at, updated_at, image_url, link, type, "order") 
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`;
 
     const params = [
@@ -123,7 +123,7 @@ class PostService {
   public static async show(id: string) {
     const connection = await this.pool.connect();
     const result = await connection.queryObject<Post>(
-      "SELECT * FROM posts WHERE id = $1 AND deleted_at IS NULL",
+      "SELECT * FROM sb_posts WHERE id = $1 AND deleted_at IS NULL",
       [id]
     );
     connection.release();
@@ -139,7 +139,7 @@ class PostService {
   public static async update(id: string, data: PostUpdate) {
     const connection = await this.pool.connect();
     const query = `
-      UPDATE posts
+      UPDATE sb_posts
       SET title = $1, content = $2, image_url = $3, link = $4, collection_id = $5, updated_at = NOW()
       WHERE id = $6 AND deleted_at IS NULL
       RETURNING *
@@ -167,7 +167,7 @@ class PostService {
   public static async delete(id: string) {
     const connection = await this.pool.connect();
     const result = await connection.queryObject<Post>(
-      "UPDATE posts SET deleted_at = NOW() WHERE id = $1 AND deleted_at IS NULL RETURNING *",
+      "UPDATE sb_posts SET deleted_at = NOW() WHERE id = $1 AND deleted_at IS NULL RETURNING *",
       [id]
     );
     connection.release();
