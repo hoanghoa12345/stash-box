@@ -72,6 +72,29 @@ class AuthController {
     response(ctx, 200, "Get user successful!", ctx.state.user);
   }
 
+  public static async refreshToken(ctx: Context) {
+    try {
+      const refreshTokenHeader = ctx.request.headers.get("x-refresh-token");
+      if (!refreshTokenHeader) {
+        response(ctx, 400, "Refresh token is required");
+        return;
+      }
+      const { data, error } = await AuthService.refreshToken(
+        refreshTokenHeader
+      );
+      if (error) {
+        logErr(error);
+        response(ctx, 400, error.message);
+        return;
+      }
+      response(ctx, 200, "Refresh token successful!", data);
+    } catch (error) {
+      logErr(error);
+      response(ctx, 500, "Internal server error", error);
+      return;
+    }
+  }
+
   public static async signOut(ctx: Context) {
     try {
       const { error } = await AuthService.signOut();

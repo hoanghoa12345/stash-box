@@ -7,7 +7,7 @@ class MetaTagService {
     headers.set("accept", "text/html,application/xhtml+xml,application/xml");
     headers.set(
       "user-agent",
-      "Mozilla/5.0 (Windows NT 11.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+      "Mozilla / 5.0 (Windows NT 10.0; Win64; x64) AppleWebKit / 537.36 (KHTML, like Gecko) Chrome / 89.0.142.86 Safari / 537.36"
     );
     const res = await fetch(url, { headers });
     const html = await res.text();

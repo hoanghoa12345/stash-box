@@ -1,49 +1,41 @@
 import { Button } from "@/components/ui/button"
-
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { Folder } from "lucide-react"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { useNavigate } from "react-router-dom"
-import PostService from "@/services/PostService"
-import { ICollection, Post } from "@/types/index"
+import { ICollection } from "@/types/index"
 import AppSidebar from "@/components/Sidebar"
 import AppHeader from "@/components/Header"
 import LinkCard from "@/components/Card"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useQuery } from "@tanstack/react-query"
+import { PostService } from "@/services/post"
 
 export default function Collection() {
   const [selectedCollection, setSelectedCollection] =
     useState<ICollection | null>(null)
-  const [posts, setPosts] = useState<Post[]>([])
-  const [isLoading, setIsLoading] = useState<boolean>(false)
   const navigate = useNavigate()
 
-  useEffect(() => {
-    getPostByCollection()
-  }, [])
-
-  const getPostByCollection = async (collectionId?: string) => {
-    try {
-      setIsLoading(true)
-      const response = await PostService.getPosts({
-        collectionId: collectionId,
+  const {
+    data: posts,
+    isLoading,
+    error
+  } = useQuery({
+    queryKey: ["posts", selectedCollection?.id],
+    queryFn: () =>
+      PostService.getPosts({
+        collectionId: selectedCollection?.id || "",
         isUnCategorized: false,
         filter: "",
         offset: -1,
         limit: 50
       })
-      setPosts(response.data)
-    } catch (error) {
-      if (error instanceof Error) {
-        toast.error(error.message)
-      } else {
-        toast.error("An unknown error occurred while fetching posts")
-      }
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  })
+
+  useEffect(() => {
+    toast.error(error?.message)
+  }, [error])
 
   return (
     <SidebarProvider>
@@ -64,7 +56,7 @@ export default function Collection() {
                 ))}
               </>
             ) : (
-              posts.map((card) => (
+              posts?.data.map((card) => (
                 <LinkCard
                   card={card}
                   key={card.id}
@@ -76,7 +68,7 @@ export default function Collection() {
             )}
           </div>
 
-          {posts.length === 0 && !isLoading ? (
+          {posts?.data.length === 0 && !isLoading ? (
             <div className="flex flex-col items-center justify-center h-64 text-center">
               <Folder className="size-12 text-muted-foreground mb-4" />
               <h3 className="text-lg font-semibold mb-2">

@@ -17,6 +17,7 @@ router.post("/__sign_up_user", AuthController.signUp);
 router.post("/sign-in", AuthController.signIn);
 router.get("/user", auth, AuthController.getUser);
 router.post("/sign-out", auth, AuthController.signOut);
+router.post("/refresh-token", AuthController.refreshToken);
 
 router.get("/collections", auth, CollectionController.index);
 router.post("/collections", auth, CollectionController.store);

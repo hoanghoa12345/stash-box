@@ -19,12 +19,20 @@ class AuthService {
       password,
     });
   }
+
   public static signIn(email: string, password: string) {
     return this.supabaseClient.auth.signInWithPassword({
       email,
       password,
     });
   }
+
+  public static refreshToken(refreshToken: string) {
+    return this.supabaseClient.auth.refreshSession({
+      refresh_token: refreshToken,
+    });
+  }
+
   public static signOut() {
     return this.supabaseClient.auth.signOut();
   }
