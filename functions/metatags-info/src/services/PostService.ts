@@ -1,5 +1,5 @@
 import { Pool } from "../config/deps.ts";
-import { log } from "../utils/logger.ts";
+import { log, logErr } from "../utils/logger.ts";
 import { PostType, PostUpdate, type Post } from "../models/Post.ts";
 import MetaTagService from "./MetaTagService.ts";
 
@@ -89,7 +89,7 @@ class PostService {
     post.type = type;
     post.title = computedTitle;
     post.content = computedContent;
-    post.link = computedLink;
+    post.link = computedLink || null;
     post.image_url = image_url || null;
 
     const query = `INSERT INTO sb_posts (user_id, title, content, collection_id, created_at, updated_at, image_url, link, type, "order") 
@@ -194,19 +194,29 @@ class PostService {
       };
     }
 
-    const metatags = await MetaTagService.getMetaTags(url);
+    try {
+      const metatags = await MetaTagService.getMetaTags(url);
 
-    return {
-      type: PostType.POST_TYPE_LINK,
-      title: metatags?.title || metatags?.["og:title"] || title,
-      content:
-        metatags?.description ||
-        metatags?.["og:description"] ||
-        metatags?.["twitter:description"] ||
-        content,
-      link: metatags?.["og:url"] || url,
-      image_url: metatags?.["og:image"] || metatags?.["twitter:image"] || null,
-    };
+      return {
+        type: PostType.POST_TYPE_LINK,
+        title: metatags?.title || metatags?.["og:title"] || title,
+        content:
+          metatags?.description ||
+          metatags?.["og:description"] ||
+          metatags?.["twitter:description"] ||
+          content,
+        link: url,
+        image_url:
+          metatags?.["og:image"] || metatags?.["twitter:image"] || null,
+      };
+    } catch (error) {
+      logErr(error);
+      return {
+        type: PostType.POST_TYPE_LINK,
+        title: title,
+        link: url,
+      };
+    }
   }
 }
 

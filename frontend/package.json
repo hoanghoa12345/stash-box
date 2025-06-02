@@ -9,6 +9,8 @@
     "email": "hoanghoa@hoadev.site",
     "url": "https://github.com/hoanghoa12345"
   },
+  "main": "index.html",
+  "homepage": "https://hoanghoa12345.github.io/stash-box/",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
