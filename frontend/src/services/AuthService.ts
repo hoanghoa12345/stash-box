@@ -20,10 +20,18 @@ export class AuthService {
     return response.data
   }
 
-  public static async refreshToken(refreshToken: string) {
-    const response = await axiosClient.post("/refresh-token", {
-      refresh_token: refreshToken
-    })
+  public static async refreshToken(
+    refreshToken: string
+  ): Promise<DataResponse<UserData>> {
+    const response = await axiosClient.post(
+      "/refresh-token",
+      {},
+      {
+        headers: {
+          "x-refresh-token": refreshToken
+        }
+      }
+    )
     return response.data
   }
 

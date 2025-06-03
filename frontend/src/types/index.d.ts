@@ -91,3 +91,8 @@ export type LoginRequest = {
   email: string
   password: string
 }
+
+export type FailedRequest = {
+  resolve: (token: string) => void
+  reject: (error: unknown) => void
+}

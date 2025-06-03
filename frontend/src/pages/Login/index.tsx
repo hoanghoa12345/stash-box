@@ -25,6 +25,7 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [isRemember, setIsRemember] = useState(false)
   const navigate = useNavigate()
 
   const mutation = useMutation({
@@ -33,9 +34,11 @@ export default function Login() {
       Cookies.set("access_token", data.data.session.access_token, {
         expires: 1
       })
-      Cookies.set("refresh_token", data.data.session.refresh_token, {
-        expires: 30
-      })
+      if (isRemember) {
+        Cookies.set("refresh_token", data.data.session.refresh_token, {
+          expires: 30
+        })
+      }
       Cookies.set("expires_in", data.data.session.expires_in.toString(), {
         expires: 1
       })
@@ -111,6 +114,8 @@ export default function Login() {
                 <input
                   id="remember"
                   type="checkbox"
+                  checked={isRemember}
+                  onChange={(e) => setIsRemember(e.target.checked)}
                   className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 />
                 <Label htmlFor="remember" className="text-sm font-normal">
