@@ -21,7 +21,7 @@ jobs:
           version: latest
       - name: Create directory structure
         run: |
-          mkdir -p supabase/functions
-          ln -s ../../functions/$FUNCTION_NAME supabase/functions/$FUNCTION_NAME
+          mkdir supabase
+          mv functions/ supabase/
       - name: Deploy Function
         run: supabase functions deploy $FUNCTION_NAME --project-ref $PROJECT_ID
