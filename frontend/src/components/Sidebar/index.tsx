@@ -11,7 +11,7 @@ import {
   SidebarMenuItem
 } from "@/components/ui/sidebar"
 import { Folder } from "lucide-react"
-import { ICollection } from "@/types"
+import { ICollection, UpsetCollection } from "@/types"
 import { toast } from "sonner"
 import SidebarItem from "./item"
 import { Skeleton } from "../ui/skeleton"
@@ -19,6 +19,7 @@ import CreateCollectionDialog from "../Dialog/CreateCollectionDialog"
 import { CollectionService } from "@/services/CollectionService"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { handleError } from "@/utils"
+import { DeleteAlert } from "../Alert/DeleteAlert"
 
 const unCategorized: ICollection = {
   id: null,
@@ -41,6 +42,10 @@ const AppSidebar = ({
   setSelectedCollection
 }: AppSidebarProps) => {
   const queryClient = useQueryClient()
+  const [isOpenDeleteAlert, setIsOpenDeleteAlert] = useState(false)
+  const [editedCollection, setEditedCollection] = useState<ICollection | null>(
+    null
+  )
   const {
     data: collections,
     error,
@@ -54,19 +59,46 @@ const AppSidebar = ({
       })
   })
   const mutation = useMutation({
-    mutationFn: CollectionService.createCollection,
-    onSuccess: () => {
+    mutationFn: ({ name, icon, collectionId }: UpsetCollection) =>
+      collectionId
+        ? CollectionService.updateCollection({
+            id: collectionId,
+            name,
+            icon
+          })
+        : CollectionService.createCollection({
+            name,
+            icon
+          }),
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["collections"] })
-      toast.success("Collection created successfully")
+      toast.success(data.msg)
       setIsCreateModalOpen(false)
     },
+    onError: (error) => {
+      handleError(toast, error)
+    }
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: CollectionService.removeCollection,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["collections"] })
+      toast.success("Collection deleted successfully")
+      setIsOpenDeleteAlert(false)
+      setSelectedCollection?.(null)
+    },
     onError: () => {
-      toast.error("Failed to create collection")
+      toast.error("Failed to delete collection")
     }
   })
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
-  const handleCreateCollection = async (name: string, emoji: string) => {
+  const handleCreateCollection = async ({
+    name,
+    icon,
+    collectionId
+  }: UpsetCollection) => {
     if (!name.trim()) {
       toast.error("Collection name cannot be empty")
       return
@@ -74,8 +106,19 @@ const AppSidebar = ({
 
     mutation.mutate({
       name,
-      icon: emoji
+      icon,
+      collectionId
     })
+  }
+
+  const handleEditCollection = (collection: ICollection) => {
+    setEditedCollection(collection)
+    setIsCreateModalOpen(true)
+  }
+
+  const handleDeleteCollection = (collection: ICollection) => {
+    setSelectedCollection?.(collection)
+    setIsOpenDeleteAlert(true)
   }
 
   useEffect(() => {
@@ -103,65 +146,72 @@ const AppSidebar = ({
   }
 
   return (
-    <Sidebar>
-      <SidebarHeader>
-        <div className="flex items-center gap-2 px-4 py-2">
-          <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <Folder className="size-4" />
+    <>
+      <Sidebar>
+        <SidebarHeader className="bg-background">
+          <div className="flex items-center gap-2 px-4 py-2">
+            <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+              <Folder className="size-4" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-sm font-semibold">Collections</span>
+              <span className="text-xs text-muted-foreground">
+                Organize your resources
+              </span>
+            </div>
           </div>
-          <div className="flex flex-col">
-            <span className="text-sm font-semibold">Collections</span>
-            <span className="text-xs text-muted-foreground">
-              Organize your resources
-            </span>
-          </div>
-        </div>
-      </SidebarHeader>
-      <SidebarContent>
-        <SidebarGroup>
-          <div className="flex items-center justify-between">
-            <SidebarGroupLabel>Your Collections</SidebarGroupLabel>
-            <CreateCollectionDialog
-              isOpen={isCreateModalOpen}
-              setIsOpen={setIsCreateModalOpen}
-              onCreate={handleCreateCollection}
-            />
-          </div>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {isLoading ? (
-                <SidebarMenuItem className="flex flex-col gap-2">
-                  <Skeleton className="h-10 w-full" />
-                  <Skeleton className="h-10 w-full" />
-                  <Skeleton className="h-10 w-full" />
-                  <Skeleton className="h-10 w-full" />
-                </SidebarMenuItem>
-              ) : collections?.data.length === 0 ? (
-                <SidebarMenuItem>
-                  <SidebarMenuButton className="w-full justify-center">
-                    No collections found. Please create one.
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ) : (
-                [unCategorized, ...(collections?.data ?? [])].map(
-                  (collection) => (
-                    <SidebarItem
-                      key={collection.id}
-                      collection={collection}
-                      onClick={() => setSelectedCollection?.(collection)}
-                      isActive={
-                        selectedCollection?.id === collection.id ||
-                        (selectedCollection === null && collection.id === null)
-                      }
-                    />
+        </SidebarHeader>
+        <SidebarContent className="bg-background">
+          <SidebarGroup>
+            <div className="flex items-center justify-between">
+              <SidebarGroupLabel>Your Collections</SidebarGroupLabel>
+              <CreateCollectionDialog
+                isOpen={isCreateModalOpen}
+                setIsOpen={setIsCreateModalOpen}
+                onSubmit={handleCreateCollection}
+                initialData={editedCollection}
+              />
+            </div>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {collections?.data.length === 0 ? (
+                  <SidebarMenuItem>
+                    <SidebarMenuButton className="w-full justify-center">
+                      No collections found. Please create one.
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ) : (
+                  [unCategorized, ...(collections?.data ?? [])].map(
+                    (collection) => (
+                      <SidebarItem
+                        key={collection.id}
+                        collection={collection}
+                        onClick={() => setSelectedCollection?.(collection)}
+                        isActive={
+                          selectedCollection?.id === collection.id ||
+                          (selectedCollection === null &&
+                            collection.id === null)
+                        }
+                        onEdit={handleEditCollection}
+                        onDelete={handleDeleteCollection}
+                      />
+                    )
                   )
-                )
-              )}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
-    </Sidebar>
+                )}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
+      </Sidebar>
+      <DeleteAlert
+        isOpen={isOpenDeleteAlert}
+        onOpenChange={setIsOpenDeleteAlert}
+        onConfirm={() => {
+          if (selectedCollection?.id)
+            deleteMutation.mutate({ id: selectedCollection.id })
+        }}
+      />
+    </>
   )
 }
 

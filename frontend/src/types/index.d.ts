@@ -96,3 +96,9 @@ export type FailedRequest = {
   resolve: (token: string) => void
   reject: (error: unknown) => void
 }
+
+export type UpsetCollection = {
+  name: string
+  icon: string
+  collectionId?: string | null
+}

@@ -11,21 +11,28 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "../ui/button"
 import { Plus } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import { ICollection, UpsetCollection } from "@/types"
 
 type CreateCollectionDialogProps = {
   isOpen: boolean
   setIsOpen: (open: boolean) => void
-  onCreate: (name: string, emoji: string) => void
+  onSubmit: ({ name, icon, collectionId }: UpsetCollection) => void
+  initialData?: ICollection | null
 }
 
 const CreateCollectionDialog = ({
   isOpen,
   setIsOpen,
-  onCreate
+  onSubmit,
+  initialData
 }: CreateCollectionDialogProps) => {
   const [newCollectionName, setNewCollectionName] = useState("")
   const [newCollectionEmoji, setNewCollectionEmoji] = useState("📁")
+  useEffect(() => {
+    setNewCollectionName(initialData?.name || "")
+    setNewCollectionEmoji(initialData?.icon || "📁")
+  }, [initialData])
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
@@ -36,7 +43,9 @@ const CreateCollectionDialog = ({
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create New Collection</DialogTitle>
+          <DialogTitle>
+            {initialData ? "Edit Collection" : "Create New Collection"}
+          </DialogTitle>
           <DialogDescription>
             Add a new collection to organize your resources. Choose a name and
             an emoji icon.
@@ -91,10 +100,16 @@ const CreateCollectionDialog = ({
             Cancel
           </Button>
           <Button
-            onClick={() => onCreate(newCollectionName, newCollectionEmoji)}
+            onClick={() =>
+              onSubmit({
+                name: newCollectionName,
+                icon: newCollectionEmoji,
+                collectionId: initialData?.id
+              })
+            }
             disabled={!newCollectionName.trim()}
           >
-            Create Collection
+            {initialData ? "Update Collection" : "Create Collection"}
           </Button>
         </DialogFooter>
       </DialogContent>

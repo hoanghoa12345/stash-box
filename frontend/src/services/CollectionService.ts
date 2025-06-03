@@ -38,15 +38,25 @@ export class CollectionService {
     name: string
     icon: string
   }): Promise<DataResponse<ICollection>> {
-    return axiosClient.put(`/collections/${id}`, {
+    const response = await axiosClient.put("/collections", {
+      id,
       name,
-      icon
+      icon,
+      isRoot: true
     })
+    return response.data
   }
 
-  public static async removeCollection(
+  public static async removeCollection({
+    id
+  }: {
     id: string
-  ): Promise<DataResponse<ICollection>> {
-    return axiosClient.delete(`/collections/${id}`)
+  }): Promise<DataResponse<ICollection>> {
+    return axiosClient.delete("/collections", {
+      data: {
+        id,
+        isNested: false
+      }
+    })
   }
 }
