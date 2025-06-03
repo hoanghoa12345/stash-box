@@ -71,3 +71,23 @@ export interface PostCreateData {
   imageUrl?: string | null
   link?: string | null
 }
+
+export interface ApiError extends Error {
+  response: {
+    data: {
+      success: boolean
+      status: string
+      msg: string
+    }
+  }
+}
+
+export type ToastInstance = {
+  error: (message: string) => void
+  success: (message: string) => void
+}
+
+export type LoginRequest = {
+  email: string
+  password: string
+}

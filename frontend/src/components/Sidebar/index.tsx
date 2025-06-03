@@ -16,8 +16,9 @@ import { toast } from "sonner"
 import SidebarItem from "./item"
 import { Skeleton } from "../ui/skeleton"
 import CreateCollectionDialog from "../Dialog/CreateCollectionDialog"
-import { CollectionService } from "@/services/collection"
+import { CollectionService } from "@/services/CollectionService"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { handleError } from "@/utils"
 
 const unCategorized: ICollection = {
   id: null,
@@ -78,7 +79,9 @@ const AppSidebar = ({
   }
 
   useEffect(() => {
-    toast.error(error?.message)
+    if (error) {
+      handleError(toast, error)
+    }
   }, [error])
 
   if (isLoading) {

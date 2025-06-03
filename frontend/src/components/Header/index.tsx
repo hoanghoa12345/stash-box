@@ -1,12 +1,14 @@
-import React, { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { SidebarTrigger } from "../ui/sidebar"
 import { Button } from "../ui/button"
-import { Calendar, CirclePlus, Star } from "lucide-react"
-import { ICollection, User } from "@/types"
+import { CirclePlus } from "lucide-react"
+import { ICollection } from "@/types"
 import UserMenu from "./user"
-import AuthService from "@/services/AuthService"
+import { AuthService } from "@/services/AuthService"
 import { toast } from "sonner"
 import { useNavigate } from "react-router-dom"
+import { useMutation, useQuery } from "@tanstack/react-query"
+import { handleError } from "@/utils"
 
 type AppHeaderProps = {
   selectedCollection: ICollection | null
@@ -14,33 +16,30 @@ type AppHeaderProps = {
 
 const AppHeader = ({ selectedCollection }: AppHeaderProps) => {
   const navigate = useNavigate()
-  const [user, setUser] = useState<User>()
-  const [isLoading, setIsLoading] = useState<boolean>(true)
-  const getUserProfile = async () => {
-    try {
-      const userProfile = await AuthService.getUserData()
-      setUser(userProfile.data)
-    } catch (error) {
-      if (error instanceof Error) {
-        toast.error(error.message)
-      } else {
-        toast.error("An unknown error occurred")
-      }
+
+  const {
+    data: user,
+    isError,
+    error
+  } = useQuery({
+    queryKey: ["user"],
+    queryFn: () => AuthService.getUser(),
+    retry: false
+  })
+
+  const mutation = useMutation({
+    mutationFn: AuthService.logout,
+    onSuccess: () => {
+      navigate("/login")
+    },
+    onError: (error) => {
+      handleError(toast, error)
       navigate("/login")
     }
-  }
+  })
 
   const handleLogout = async () => {
-    try {
-      await AuthService.logout()
-      navigate("/login")
-    } catch (error) {
-      if (error instanceof Error) {
-        toast.error(error.message)
-      } else {
-        toast.error("An unknown error occurred while logging out")
-      }
-    }
+    mutation.mutate()
   }
 
   const navigateToCreatePost = () => {
@@ -48,8 +47,11 @@ const AppHeader = ({ selectedCollection }: AppHeaderProps) => {
   }
 
   useEffect(() => {
-    getUserProfile()
-  }, [navigate])
+    if (isError) {
+      handleError(toast, error)
+      navigate("/login")
+    }
+  }, [error, isError, navigate])
 
   return (
     <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
@@ -77,8 +79,8 @@ const AppHeader = ({ selectedCollection }: AppHeaderProps) => {
           Recent
         </Button> */}
         <UserMenu
-          userName={user?.email?.split("@")[0]}
-          userEmail={user?.email}
+          userName={user?.data.email?.split("@")[0]}
+          userEmail={user?.data.email}
           onLogout={handleLogout}
           // userProfilePicture={user?.profilePicture}
         />

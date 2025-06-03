@@ -6,13 +6,15 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, Save, X, Eye, Clock } from "lucide-react"
+import { ArrowLeft, Save, X, Eye, Clock, Loader2 } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import PostService from "@/services/PostService"
+import { PostService } from "@/services/PostService"
 import { ICollection } from "@/types"
-import CollectionService from "@/services/CollectionService"
+import { CollectionService } from "@/services/CollectionService"
 import { toast } from "sonner"
+import { handleError } from "@/utils"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 const unCategorizedCollection: ICollection = {
   id: null,
@@ -29,11 +31,40 @@ export default function PostDetail() {
   const [title, setTitle] = useState("")
   const [content, setContent] = useState("")
   const [isDirty, setIsDirty] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [collections, setCollections] = useState<ICollection[]>([])
   const [selectedCollection, setSelectedCollection] =
     useState<ICollection | null>(null)
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
+
+  const {
+    data: collections,
+    error,
+    isLoading
+  } = useQuery({
+    queryKey: ["collections"],
+    queryFn: () =>
+      CollectionService.getCollections({
+        offset: -1,
+        limit: 50
+      })
+  })
+
+  const mutation = useMutation({
+    mutationFn: PostService.createPost,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["posts"] })
+      toast.success("Post saved successfully")
+      // clear fields after saving
+      setTitle("")
+      setContent("")
+      setSelectedCollection(null)
+      // Navigate back to dashboard or posts list
+      navigate("/")
+    },
+    onError: (error) => {
+      handleError(toast, error)
+    }
+  })
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTitle(e.target.value)
@@ -47,59 +78,22 @@ export default function PostDetail() {
 
   const handleSave = async () => {
     setIsDirty(false)
-    try {
-      await PostService.createPost({
-        title: title.trim(),
-        content: content.trim(),
-        collectionId: selectedCollection?.id || null
-      })
-      toast.success("Post saved successfully")
-      // clear fields after saving
-      setTitle("")
-      setContent("")
-      setSelectedCollection(null)
-      // Navigate back to dashboard or posts list
-      navigate("/")
-    } catch (error) {
-      if (error instanceof Error) {
-        toast.error(error.message)
-      } else {
-        toast.error("An unknown error occurred while saving the post")
-      }
-      return
-    }
+    mutation.mutate({
+      title: title.trim(),
+      content: content.trim(),
+      collectionId: selectedCollection?.id || null
+    })
   }
 
   const handleCancel = () => {
-    // Handle cancel logic here
     if (isDirty) {
       const confirmLeave = window.confirm(
         "You have unsaved changes. Are you sure you want to leave?"
       )
       if (!confirmLeave) return
     }
-    // Navigate back to dashboard
-    console.log("Cancelling post creation")
-    navigate("/")
-  }
 
-  const getCollections = async () => {
-    try {
-      setIsLoading(true)
-      const response = await CollectionService.getCollections({
-        offset: -1,
-        limit: 50
-      })
-      setCollections([unCategorizedCollection, ...response.data])
-    } catch (error) {
-      if (error instanceof Error) {
-        toast.error(error.message)
-      } else {
-        toast.error("An unknown error occurred while fetching collections")
-      }
-    } finally {
-      setIsLoading(false)
-    }
+    navigate("/")
   }
 
   const handlePreview = () => {
@@ -114,8 +108,10 @@ export default function PostDetail() {
   const charCount = content.length
 
   useEffect(() => {
-    getCollections()
-  }, [])
+    if (error) {
+      handleError(toast, error)
+    }
+  }, [error])
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -151,8 +147,14 @@ export default function PostDetail() {
                 Cancel
               </Button>
               <Button size="sm" onClick={handleSave} disabled={!content.trim()}>
-                <Save className="h-4 w-4 mr-2" />
-                Save Post
+                {mutation.isPending ? (
+                  <Loader2 className="animate-spin h-4 w-4" />
+                ) : (
+                  <>
+                    <Save className="h-4 w-4 mr-2" />
+                    Save Post
+                  </>
+                )}
               </Button>
             </div>
           </div>
@@ -196,7 +198,7 @@ export default function PostDetail() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     onChange={(e) => {
                       setSelectedCollection(
-                        collections.find(
+                        collections?.data.find(
                           (collection) => collection.id === e.target.value
                         ) || null
                       )
@@ -205,7 +207,10 @@ export default function PostDetail() {
                     defaultValue={unCategorizedCollection.id || ""}
                     disabled={isLoading}
                   >
-                    {collections.map((collection) => (
+                    {[
+                      unCategorizedCollection,
+                      ...(collections?.data || [])
+                    ].map((collection) => (
                       <option key={collection.id} value={collection.id || ""}>
                         {collection.name}
                       </option>
@@ -245,8 +250,14 @@ export default function PostDetail() {
             disabled={!content.trim()}
             className="w-full"
           >
-            <Save className="h-4 w-4 mr-2" />
-            Save Post
+            {mutation.isPending ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <>
+                <Save className="h-4 w-4 mr-2" />
+                Save Post
+              </>
+            )}
           </Button>
           <Button variant="outline" onClick={handleCancel} className="w-full">
             <X className="h-4 w-4 mr-2" />

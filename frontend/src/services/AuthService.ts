@@ -1,72 +1,35 @@
-import { DataResponse, User, UserData } from "@/types"
+import { DataResponse, LoginRequest, User, UserData } from "@/types"
 import axios from "axios"
 import Cookies from "js-cookie"
+import axiosClient from "./axiosClient"
 
-class AuthService {
-  private static instance: AuthService
-  private apiUrl: string
-  private authToken: string | null = null
-  private userAuthorization: string | null = null
-
-  private constructor() {
-    this.apiUrl = import.meta.env.VITE_API_URL
-    this.authToken = import.meta.env.VITE_AUTHORIZE_TOKEN
+export class AuthService {
+  public static async login({
+    email,
+    password
+  }: LoginRequest): Promise<DataResponse<UserData>> {
+    const response = await axiosClient.post("/sign-in", {
+      email,
+      password
+    })
+    return response.data
   }
 
-  static getInstance(): AuthService {
-    if (!AuthService.instance) {
-      AuthService.instance = new AuthService()
-    }
-    AuthService.instance.initializeAxios()
-    return AuthService.instance
+  public static async getUser(): Promise<DataResponse<User>> {
+    const response = await axiosClient.get("/user")
+    return response.data
   }
 
-  async login(
-    email: string,
-    password: string
-  ): Promise<DataResponse<UserData>> {
-    try {
-      const response = await axios.post(`${this.apiUrl}/sign-in`, {
-        email,
-        password
-      })
-      return response.data
-    } catch (error) {
-      console.error("Login failed:", error)
-      throw error
-    }
-  }
-  private initializeAxios(): void {
-    axios.defaults.baseURL = this.apiUrl
-    axios.defaults.headers.common["Authorization"] = `Bearer ${this.authToken}`
+  public static async refreshToken(refreshToken: string) {
+    const response = await axiosClient.post("/refresh-token", {
+      refresh_token: refreshToken
+    })
+    return response.data
   }
 
-  async getUserData(): Promise<DataResponse<User>> {
-    try {
-      this.userAuthorization = Cookies.get("access_token") || null
-      if (!this.userAuthorization) {
-        throw new Error("User is not authenticated")
-      }
-      axios.defaults.headers.common["X-User-Authorization"] =
-        `Bearer ${this.userAuthorization}`
-      const response = await axios.get("/user")
-      return response.data
-    } catch (error) {
-      console.error("Failed to fetch user data:", error)
-      throw error
-    }
-  }
-
-  async logout(): Promise<void> {
-    try {
-      await axios.post("/sign-out")
-      this.authToken = null
-      this.userAuthorization = null
-    } catch (error) {
-      console.error("Logout failed:", error)
-      throw error
-    }
+  public static async logout(): Promise<void> {
+    await axios.post("/sign-out")
+    Cookies.remove("access_token")
+    Cookies.remove("refresh_token")
   }
 }
-
-export default AuthService.getInstance()

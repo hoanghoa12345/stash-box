@@ -13,36 +13,46 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Eye, EyeOff } from "lucide-react"
 import { useState } from "react"
-import AuthService from "@/services/AuthService"
+import { AuthService } from "@/services/AuthService"
 import Cookies from "js-cookie"
 import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 import { Loader2 } from "lucide-react"
+import { useMutation } from "@tanstack/react-query"
+import { handleError } from "@/utils"
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
+
+  const mutation = useMutation({
+    mutationFn: AuthService.login,
+    onSuccess: (data) => {
+      Cookies.set("access_token", data.data.session.access_token, {
+        expires: 1
+      })
+      Cookies.set("refresh_token", data.data.session.refresh_token, {
+        expires: 30
+      })
+      Cookies.set("expires_in", data.data.session.expires_in.toString(), {
+        expires: 1
+      })
+      Cookies.set("expires_at", data.data.session.expires_at.toString(), {
+        expires: 1
+      })
+      navigate("/")
+    },
+    onError: (error) => {
+      handleError(toast, error)
+    }
+  })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    try {
-      setIsLoading(true)
-      const data = await AuthService.login(email, password)
-      if (data.success) {
-        Cookies.set("access_token", data.data.session.access_token, {
-          expires: 7
-        })
-        localStorage.setItem("user", JSON.stringify(data.data.user))
-        navigate("/")
-      }
-    } catch (error) {
-      toast.error("Login failed. Please check your credentials.")
-    } finally {
-      setIsLoading(false)
-    }
+
+    mutation.mutate({ email, password })
   }
 
   return (
@@ -118,7 +128,7 @@ export default function Login() {
               className="w-full"
               disabled={!email || !password}
             >
-              {isLoading ? (
+              {mutation.isPending ? (
                 <Loader2 className="size-4 animate-spin" />
               ) : (
                 "Sign in"

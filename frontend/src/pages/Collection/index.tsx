@@ -10,7 +10,8 @@ import AppHeader from "@/components/Header"
 import LinkCard from "@/components/Card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useQuery } from "@tanstack/react-query"
-import { PostService } from "@/services/post"
+import { PostService } from "@/services/PostService"
+import { handleError } from "@/utils"
 
 export default function Collection() {
   const [selectedCollection, setSelectedCollection] =
@@ -34,7 +35,9 @@ export default function Collection() {
   })
 
   useEffect(() => {
-    toast.error(error?.message)
+    if (error) {
+      handleError(toast, error)
+    }
   }, [error])
 
   return (
