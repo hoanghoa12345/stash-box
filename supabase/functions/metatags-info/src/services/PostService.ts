@@ -91,6 +91,8 @@ class PostService {
     post.content = computedContent;
     post.link = computedLink || null;
     post.image_url = image_url || null;
+    post.created_at = new Date().toISOString();
+    post.updated_at = post.created_at;
 
     const query = `INSERT INTO sb_posts (user_id, title, content, collection_id, created_at, updated_at, image_url, link, type, "order") 
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`;
@@ -191,6 +193,7 @@ class PostService {
       return {
         type: PostType.POST_TYPE_TEXT,
         title: title,
+        content: content,
       };
     }
 

@@ -72,6 +72,15 @@ export interface PostCreateData {
   link?: string | null
 }
 
+export interface PostUpdateData {
+  id: string
+  title: string
+  content: string
+  collectionId?: string | null
+  imageUrl?: string | null
+  link?: string | null
+}
+
 export interface ApiError extends Error {
   response: {
     data: {

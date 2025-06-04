@@ -20,6 +20,7 @@ import { CollectionService } from "@/services/CollectionService"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { handleError } from "@/utils"
 import { DeleteAlert } from "../Alert/DeleteAlert"
+import { useNavigate } from "react-router-dom"
 
 const unCategorized: ICollection = {
   id: null,
@@ -32,20 +33,15 @@ const unCategorized: ICollection = {
   deleted_at: null
 }
 
-type AppSidebarProps = {
-  selectedCollection?: ICollection | null
-  setSelectedCollection?: (collection: ICollection | null) => void
-}
-
-const AppSidebar = ({
-  selectedCollection,
-  setSelectedCollection
-}: AppSidebarProps) => {
+const AppSidebar = () => {
   const queryClient = useQueryClient()
+  const [selectedCollection, setSelectedCollection] =
+    useState<ICollection | null>(null)
   const [isOpenDeleteAlert, setIsOpenDeleteAlert] = useState(false)
   const [editedCollection, setEditedCollection] = useState<ICollection | null>(
     null
   )
+  const navigate = useNavigate()
   const {
     data: collections,
     error,
@@ -74,6 +70,7 @@ const AppSidebar = ({
       queryClient.invalidateQueries({ queryKey: ["collections"] })
       toast.success(data.msg)
       setIsCreateModalOpen(false)
+      setEditedCollection(null)
     },
     onError: (error) => {
       handleError(toast, error)
@@ -109,6 +106,15 @@ const AppSidebar = ({
       icon,
       collectionId
     })
+  }
+
+  const handleNavigateCollection = (collection: ICollection) => {
+    setSelectedCollection?.(collection)
+    if (collection.id === unCategorized.id) {
+      navigate("/")
+      return
+    }
+    navigate(`/collection/${collection.id}`)
   }
 
   const handleEditCollection = (collection: ICollection) => {
@@ -186,7 +192,7 @@ const AppSidebar = ({
                       <SidebarItem
                         key={collection.id}
                         collection={collection}
-                        onClick={() => setSelectedCollection?.(collection)}
+                        onClick={() => handleNavigateCollection(collection)}
                         isActive={
                           selectedCollection?.id === collection.id ||
                           (selectedCollection === null &&

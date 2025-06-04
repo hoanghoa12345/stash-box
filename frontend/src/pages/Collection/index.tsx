@@ -3,36 +3,72 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { Folder } from "lucide-react"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
-import { useNavigate } from "react-router-dom"
-import { ICollection } from "@/types/index"
+import { useNavigate, useParams } from "react-router-dom"
 import AppSidebar from "@/components/Sidebar"
 import AppHeader from "@/components/Header"
 import LinkCard from "@/components/Card"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { PostService } from "@/services/PostService"
 import { handleError } from "@/utils"
+import { CollectionService } from "@/services/CollectionService"
+import { DeleteAlert } from "@/components/Alert/DeleteAlert"
 
 export default function Collection() {
-  const [selectedCollection, setSelectedCollection] =
-    useState<ICollection | null>(null)
   const navigate = useNavigate()
-
+  const params = useParams()
+  const collectionId = params.collection_id
+  const queryClient = useQueryClient()
+  const [isOpenDeleteAlert, setIsOpenDeleteAlert] = useState(false)
+  const [deleteId, setDeleteId] = useState("")
   const {
     data: posts,
     isLoading,
     error
   } = useQuery({
-    queryKey: ["posts", selectedCollection?.id],
+    queryKey: ["posts", collectionId],
     queryFn: () =>
       PostService.getPosts({
-        collectionId: selectedCollection?.id || "",
-        isUnCategorized: false,
+        collectionId: collectionId || "",
+        isUnCategorized: !collectionId ? true : false,
         filter: "",
         offset: -1,
         limit: 50
       })
   })
+
+  const { data: collection } = useQuery({
+    queryKey: ["collection", collectionId],
+    queryFn: () =>
+      CollectionService.getCollection({
+        id: collectionId || ""
+      }),
+    enabled: () => {
+      if (collectionId && collectionId !== "null") {
+        return true
+      }
+      return false
+    }
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: PostService.deletePost,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["posts"] })
+      toast.success("Post deleted successfully")
+      setIsOpenDeleteAlert(false)
+      setDeleteId("")
+    },
+    onError: () => {
+      toast.error("Failed to delete post")
+    }
+  })
+
+  const handleDeletePost = () => {
+    if (deleteId) {
+      deleteMutation.mutate({ id: deleteId })
+    }
+  }
 
   useEffect(() => {
     if (error) {
@@ -42,13 +78,10 @@ export default function Collection() {
 
   return (
     <SidebarProvider>
-      <AppSidebar
-        selectedCollection={selectedCollection}
-        setSelectedCollection={setSelectedCollection}
-      />
+      <AppSidebar />
 
       <SidebarInset>
-        <AppHeader selectedCollection={selectedCollection} />
+        <AppHeader selectedCollection={collection?.data} />
 
         <div className="flex-1 p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -64,7 +97,13 @@ export default function Collection() {
                   card={card}
                   key={card.id}
                   onClick={() => {
-                    navigate(`/post/${card.id}`)
+                    navigate(
+                      `/post/${card.id}?collection_id=${card.collection_id}`
+                    )
+                  }}
+                  onDelete={() => {
+                    setIsOpenDeleteAlert(true)
+                    setDeleteId(card.id)
                   }}
                 />
               ))
@@ -80,9 +119,24 @@ export default function Collection() {
               <p className="text-muted-foreground mb-4">
                 Start by adding some resources to this collection.
               </p>
-              <Button>Add Item</Button>
+              <Button
+                onClick={() =>
+                  navigate(
+                    `/p/create?collection_id=${
+                      collection?.data?.id || collectionId
+                    }`
+                  )
+                }
+              >
+                Add Item
+              </Button>
             </div>
           ) : null}
+          <DeleteAlert
+            isOpen={isOpenDeleteAlert}
+            onOpenChange={() => setIsOpenDeleteAlert(!isOpenDeleteAlert)}
+            onConfirm={handleDeletePost}
+          />
         </div>
       </SidebarInset>
     </SidebarProvider>

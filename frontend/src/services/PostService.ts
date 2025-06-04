@@ -1,4 +1,4 @@
-import { DataResponse, Post, PostCreateData } from "@/types"
+import { DataResponse, Post, PostCreateData, PostUpdateData } from "@/types"
 import axiosClient from "./axiosClient"
 
 export class PostService {
@@ -25,6 +25,43 @@ export class PostService {
     postData: PostCreateData
   ): Promise<DataResponse<Post>> {
     const response = await axiosClient.post("/posts", postData)
+    return response.data
+  }
+
+  public static async getPost({
+    id
+  }: {
+    id: string
+  }): Promise<DataResponse<Post>> {
+    const response = await axiosClient.get(`/posts/${id}`)
+    return response.data
+  }
+
+  public static async updatePost({
+    id,
+    title,
+    content,
+    collectionId,
+    imageUrl,
+    link
+  }: PostUpdateData): Promise<DataResponse<Post>> {
+    const response = await axiosClient.put(`/posts/${id}`, {
+      id,
+      title,
+      content,
+      collectionId,
+      imageUrl,
+      link
+    })
+    return response.data
+  }
+
+  public static async deletePost({
+    id
+  }: {
+    id: string
+  }): Promise<DataResponse<Post>> {
+    const response = await axiosClient.delete(`/posts/${id}`)
     return response.data
   }
 }

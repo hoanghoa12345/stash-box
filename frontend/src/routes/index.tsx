@@ -1,6 +1,7 @@
 import MainLayout from "@/layouts/MainLayout"
 import Collection from "@/pages/Collection"
 import Login from "@/pages/Login"
+import NotFoundPage from "@/pages/NotFound"
 import PostDetail from "@/pages/Post"
 import { createBrowserRouter } from "react-router-dom"
 
@@ -15,7 +16,15 @@ const router = createBrowserRouter(
           element: <Collection />
         },
         {
-          path: "/p/:post_id",
+          path: "/collection/:collection_id",
+          element: <Collection />
+        },
+        {
+          path: "/post/:post_id",
+          element: <PostDetail />
+        },
+        {
+          path: "/post/:post_id/edit",
           element: <PostDetail />
         }
       ]
@@ -23,6 +32,10 @@ const router = createBrowserRouter(
     {
       path: "/login",
       element: <Login />
+    },
+    {
+      path: "*",
+      element: <NotFoundPage />
     }
   ],
   {

@@ -8,9 +8,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ArrowLeft, Save, X, Eye, Clock, Loader2 } from "lucide-react"
 import { useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useParams, useSearchParams } from "react-router-dom"
 import { PostService } from "@/services/PostService"
-import { ICollection } from "@/types"
+import { ICollection, PostCreateData } from "@/types"
 import { CollectionService } from "@/services/CollectionService"
 import { toast } from "sonner"
 import { handleError } from "@/utils"
@@ -34,8 +34,12 @@ export default function PostDetail() {
   const [selectedCollection, setSelectedCollection] =
     useState<ICollection | null>(null)
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const queryClient = useQueryClient()
-
+  const params = useParams()
+  const postId =
+    params.post_id && params.post_id !== "create" ? params.post_id : null
+  const collectionId = searchParams.get("collection_id")
   const {
     data: collections,
     error,
@@ -49,17 +53,45 @@ export default function PostDetail() {
       })
   })
 
+  const { data: post } = useQuery({
+    queryKey: ["post", postId],
+    queryFn: () =>
+      PostService.getPost({
+        id: postId || ""
+      }),
+    enabled: !!postId
+  })
+
   const mutation = useMutation({
-    mutationFn: PostService.createPost,
-    onSuccess: () => {
+    mutationFn: (data: PostCreateData) => {
+      return postId
+        ? PostService.updatePost({
+            id: postId,
+            title: data.title,
+            content: data.content,
+            collectionId: data.collectionId,
+            imageUrl: post?.data.image_url,
+            link: post?.data.link
+          })
+        : PostService.createPost({
+            title: data.title,
+            content: data.content,
+            collectionId: data.collectionId
+          })
+    },
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["posts"] })
-      toast.success("Post saved successfully")
+      toast.success(data.msg)
       // clear fields after saving
       setTitle("")
       setContent("")
       setSelectedCollection(null)
       // Navigate back to dashboard or posts list
-      navigate("/")
+      if (collectionId) {
+        navigate(`/collection/${collectionId}`)
+      } else {
+        navigate("/")
+      }
     },
     onError: (error) => {
       handleError(toast, error)
@@ -93,7 +125,11 @@ export default function PostDetail() {
       if (!confirmLeave) return
     }
 
-    navigate("/")
+    if (collectionId) {
+      navigate(`/collection/${collectionId}`)
+    } else {
+      navigate("/")
+    }
   }
 
   const handlePreview = () => {
@@ -113,6 +149,28 @@ export default function PostDetail() {
     }
   }, [error])
 
+  useEffect(() => {
+    const collectionId = searchParams.get("collection_id")
+    if (collectionId) {
+      const collection = collections?.data?.find(
+        (collection) => collection.id === collectionId
+      )
+      setSelectedCollection(collection || unCategorizedCollection)
+    }
+  }, [collections?.data, navigate, searchParams])
+
+  useEffect(() => {
+    if (post) {
+      setTitle(post.data.title || "")
+      setContent(post.data.content || "")
+      setSelectedCollection(
+        collections?.data?.find(
+          (collection) => collection.id === post.data.collection_id
+        ) || unCategorizedCollection
+      )
+    }
+  }, [post, collections?.data])
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -125,7 +183,9 @@ export default function PostDetail() {
                 Back
               </Button>
               <div className="flex flex-col">
-                <h1 className="text-lg font-semibold">Create New Post</h1>
+                <h1 className="text-lg font-semibold">
+                  {postId ? "Edit Post" : "Create New Post"}
+                </h1>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Clock className="h-3 w-3" />
                   <span>Draft</span>
@@ -138,7 +198,12 @@ export default function PostDetail() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={handlePreview}>
+              <Button
+                className="hidden md:block"
+                variant="outline"
+                size="sm"
+                onClick={handlePreview}
+              >
                 <Eye className="h-4 w-4 mr-2" />
                 Preview
               </Button>
@@ -204,6 +269,7 @@ export default function PostDetail() {
                       )
                       setIsDirty(true)
                     }}
+                    value={selectedCollection?.id || ""}
                     defaultValue={unCategorizedCollection.id || ""}
                     disabled={isLoading}
                   >

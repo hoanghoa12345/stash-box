@@ -1,4 +1,3 @@
-import { useEffect } from "react"
 import { SidebarTrigger } from "../ui/sidebar"
 import { Button } from "../ui/button"
 import { CirclePlus } from "lucide-react"
@@ -7,25 +6,18 @@ import UserMenu from "./user"
 import { AuthService } from "@/services/AuthService"
 import { toast } from "sonner"
 import { useNavigate } from "react-router-dom"
-import { useMutation, useQuery } from "@tanstack/react-query"
+import { useMutation } from "@tanstack/react-query"
 import { handleError } from "@/utils"
+import { useAuth } from "@/hooks/useAuth"
 
 type AppHeaderProps = {
-  selectedCollection: ICollection | null
+  selectedCollection?: ICollection | null
 }
 
 const AppHeader = ({ selectedCollection }: AppHeaderProps) => {
   const navigate = useNavigate()
 
-  const {
-    data: user,
-    isError,
-    error
-  } = useQuery({
-    queryKey: ["user"],
-    queryFn: () => AuthService.getUser(),
-    retry: false
-  })
+  const { user } = useAuth()
 
   const mutation = useMutation({
     mutationFn: AuthService.logout,
@@ -43,15 +35,15 @@ const AppHeader = ({ selectedCollection }: AppHeaderProps) => {
   }
 
   const navigateToCreatePost = () => {
-    navigate("/p/create")
-  }
-
-  useEffect(() => {
-    if (isError) {
-      handleError(toast, error)
-      navigate("/login")
+    const searchParams = new URLSearchParams(window.location.search)
+    if (selectedCollection?.id) {
+      searchParams.set("collection_id", selectedCollection?.id || "")
     }
-  }, [error, isError, navigate])
+    navigate({
+      pathname: "/post/create",
+      search: searchParams.toString()
+    })
+  }
 
   return (
     <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
@@ -64,9 +56,11 @@ const AppHeader = ({ selectedCollection }: AppHeaderProps) => {
           <h1 className="text-lg font-semibold">
             {selectedCollection?.name || "Uncategorized"}
           </h1>
-          <p className="text-sm text-muted-foreground">
-            {/* {selectedCollection.count} items */}
-          </p>
+          {selectedCollection?.total_posts ? (
+            <p className="text-sm text-muted-foreground">
+              {selectedCollection.total_posts} items
+            </p>
+          ) : null}
         </div>
       </div>
       <div className="ml-auto flex items-center gap-2">

@@ -29,6 +29,15 @@ export class CollectionService {
     return response.data
   }
 
+  public static async getCollection({
+    id
+  }: {
+    id: string
+  }): Promise<DataResponse<ICollection>> {
+    const response = await axiosClient.get(`/collections/${id}`)
+    return response.data
+  }
+
   public static async updateCollection({
     id,
     name,

@@ -1,22 +1,36 @@
-import Cookies from "js-cookie"
-import { useEffect, useState } from "react"
+import { AuthService } from "@/services/AuthService"
+import { handleError } from "@/utils"
+import { useQuery } from "@tanstack/react-query"
+import { useEffect } from "react"
+import { useNavigate } from "react-router-dom"
+import { toast } from "sonner"
 
 export const useAuth = () => {
-  const [isLoading, setIsLoading] = useState(true)
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const navigate = useNavigate()
+  const {
+    data: user,
+    isError,
+    error,
+    isLoading,
+    isSuccess: isAuthenticated
+  } = useQuery({
+    queryKey: ["user"],
+    queryFn: () => AuthService.getUser(),
+    retry: false
+  })
 
   useEffect(() => {
-    const token = Cookies.get("access_token")
-    if (token) {
-      setIsAuthenticated(true)
-    } else {
-      setIsAuthenticated(false)
+    if (isError) {
+      handleError(toast, error)
+      navigate("/login")
     }
-    setIsLoading(false)
-  }, [])
+  }, [error, isError, navigate])
 
   return {
+    user,
     isLoading,
-    isAuthenticated
+    isAuthenticated,
+    isError,
+    error
   }
 }
