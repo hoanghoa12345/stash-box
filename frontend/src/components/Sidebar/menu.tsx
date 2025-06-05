@@ -31,15 +31,17 @@ export const MoreOptionMenu: FC<MoreOptionMenuProps> = ({
 }) => {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger
-        id={id}
-        className={cn(
-          "inline-flex items-center justify-center rounded-md p-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50",
-          className
-        )}
-        aria-label="Open menu"
-      >
-        <MoreVertical className="h-4 w-4" />
+      <DropdownMenuTrigger asChild id={id}>
+        <div
+          role="button"
+          className={cn(
+            "inline-flex items-center justify-center rounded-md p-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50",
+            className
+          )}
+          aria-label="Open menu"
+        >
+          <MoreVertical className="h-4 w-4" />
+        </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent align={align} side={side} className="min-w-[160px]">
         {onEdit && (

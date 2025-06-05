@@ -1,18 +1,25 @@
 import { Button } from "@/components/ui/button"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
-import { Folder } from "lucide-react"
-import { useEffect, useState } from "react"
+import { Folder, Loader2 } from "lucide-react"
+import React, { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { useNavigate, useParams } from "react-router-dom"
 import AppSidebar from "@/components/Sidebar"
 import AppHeader from "@/components/Header"
 import LinkCard from "@/components/Card"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient
+} from "@tanstack/react-query"
 import { PostService } from "@/services/PostService"
 import { handleError } from "@/utils"
 import { CollectionService } from "@/services/CollectionService"
 import { DeleteAlert } from "@/components/Alert/DeleteAlert"
+
+const PER_PAGE = 20
 
 export default function Collection() {
   const navigate = useNavigate()
@@ -24,17 +31,28 @@ export default function Collection() {
   const {
     data: posts,
     isLoading,
-    error
-  } = useQuery({
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage
+  } = useInfiniteQuery({
     queryKey: ["posts", collectionId],
-    queryFn: () =>
+    queryFn: ({ pageParam = 0 }) =>
       PostService.getPosts({
         collectionId: collectionId || "",
-        isUnCategorized: !collectionId ? true : false,
+        isUnCategorized: !collectionId,
         filter: "",
-        offset: -1,
-        limit: 50
-      })
+        offset: pageParam,
+        limit: PER_PAGE
+      }),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, pages) => {
+      if (lastPage.data.length < PER_PAGE) {
+        return
+      }
+      return PER_PAGE * pages.length
+    }
   })
 
   const { data: collection } = useQuery({
@@ -92,25 +110,47 @@ export default function Collection() {
                 ))}
               </>
             ) : (
-              posts?.data.map((card) => (
-                <LinkCard
-                  card={card}
-                  key={card.id}
-                  onClick={() => {
-                    navigate(
-                      `/post/${card.id}?collection_id=${card.collection_id}`
-                    )
-                  }}
-                  onDelete={() => {
-                    setIsOpenDeleteAlert(true)
-                    setDeleteId(card.id)
-                  }}
-                />
-              ))
+              <>
+                {posts?.pages.map((group, i) => (
+                  <React.Fragment key={i}>
+                    {group?.data.map((card) => (
+                      <LinkCard
+                        card={card}
+                        key={card.id}
+                        onClick={() => {
+                          navigate(
+                            `/post/${card.id}?collection_id=${card.collection_id}`
+                          )
+                        }}
+                        onDelete={() => {
+                          setIsOpenDeleteAlert(true)
+                          setDeleteId(card.id)
+                        }}
+                      />
+                    ))}
+                  </React.Fragment>
+                ))}
+                <div className="flex items-center justify-center">
+                  <Button
+                    onClick={() => fetchNextPage()}
+                    disabled={!hasNextPage || isFetching}
+                  >
+                    {isFetchingNextPage ? (
+                      <>
+                        Loading more <Loader2 className="size-4 animate-spin" />
+                      </>
+                    ) : hasNextPage ? (
+                      "Load More"
+                    ) : (
+                      "Nothing more to load"
+                    )}
+                  </Button>
+                </div>
+              </>
             )}
           </div>
 
-          {posts?.data.length === 0 && !isLoading ? (
+          {posts?.pages.length === 0 && !isLoading ? (
             <div className="flex flex-col items-center justify-center h-64 text-center">
               <Folder className="size-12 text-muted-foreground mb-4" />
               <h3 className="text-lg font-semibold mb-2">
