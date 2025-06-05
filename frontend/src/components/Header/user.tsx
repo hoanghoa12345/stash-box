@@ -9,6 +9,7 @@ import {
 import { Button } from "../ui/button"
 import { HelpCircle, LogOut, SettingsIcon, User } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
+import { useNavigate } from "react-router-dom"
 
 type UserMenuProps = {
   userName?: string
@@ -23,6 +24,7 @@ const UserMenu = ({
   userProfilePicture,
   onLogout
 }: UserMenuProps) => {
+  const navigate = useNavigate()
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -48,12 +50,12 @@ const UserMenu = ({
         {/* <DropdownMenuItem>
           <User className="mr-2 h-4 w-4" />
           <span>Profile</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem>
+        </DropdownMenuItem> */}
+        <DropdownMenuItem onClick={() => navigate("/settings")}>
           <SettingsIcon className="mr-2 h-4 w-4" />
           <span>Settings</span>
         </DropdownMenuItem>
-        <DropdownMenuItem>
+        {/* <DropdownMenuItem>
           <HelpCircle className="mr-2 h-4 w-4" />
           <span>Help & Support</span>
         </DropdownMenuItem> */}

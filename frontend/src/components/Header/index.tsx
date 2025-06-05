@@ -50,12 +50,10 @@ const AppHeader = ({ selectedCollection }: AppHeaderProps) => {
       <SidebarTrigger className="-ml-1" />
       <div className="flex items-center gap-2">
         <div className={`flex size-8 items-center justify-center rounded`}>
-          {selectedCollection?.icon || "📂"}
+          {selectedCollection?.icon}
         </div>
         <div className="flex flex-col">
-          <h1 className="text-lg font-semibold">
-            {selectedCollection?.name || "Uncategorized"}
-          </h1>
+          <h1 className="text-lg font-semibold">{selectedCollection?.name}</h1>
           {selectedCollection?.total_posts ? (
             <p className="text-sm text-muted-foreground">
               {selectedCollection.total_posts} items

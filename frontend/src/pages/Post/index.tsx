@@ -59,8 +59,12 @@ export default function PostDetail() {
       PostService.getPost({
         id: postId || ""
       }),
-    enabled: !!postId
+    enabled: !!postId,
+    refetchOnMount: false,
+    refetchOnReconnect: false
   })
+
+  console.log(postId, post, isDirty)
 
   const mutation = useMutation({
     mutationFn: (data: PostCreateData) => {
@@ -160,7 +164,7 @@ export default function PostDetail() {
   }, [collections?.data, navigate, searchParams])
 
   useEffect(() => {
-    if (post) {
+    if (post && !isDirty) {
       setTitle(post.data.title || "")
       setContent(post.data.content || "")
       setSelectedCollection(
@@ -169,7 +173,7 @@ export default function PostDetail() {
         ) || unCategorizedCollection
       )
     }
-  }, [post, collections?.data])
+  }, [post, collections?.data, isDirty])
 
   return (
     <div className="min-h-screen bg-gray-50">

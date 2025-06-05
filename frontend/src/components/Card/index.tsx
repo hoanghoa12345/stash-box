@@ -82,23 +82,25 @@ const LinkCard = ({ card, onClick, onDelete }: LinkCardProps) => {
               <Badge variant="outline" className="text-xs">
                 {card.collection_name || "Uncategorized"}
               </Badge>
-              <MoreOptionMenu
-                onEdit={() =>
-                  navigate(
-                    `/post/${card.id}/edit?collection_id=${card.collection_id}`
-                  )
-                }
-                onDelete={onDelete}
-              />
-              <Button
-                variant="ghost"
-                size="sm"
-                className="size-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                onClick={handleOpenLink}
-              >
-                <ExternalLink className="size-4" />
-                <span className="sr-only">Visit {card.link}</span>
-              </Button>
+              <div className="flex items-center gap-2">
+                <MoreOptionMenu
+                  onEdit={() =>
+                    navigate(
+                      `/post/${card.id}/edit?collection_id=${card.collection_id}`
+                    )
+                  }
+                  onDelete={onDelete}
+                />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="size-8 p-0"
+                  onClick={handleOpenLink}
+                >
+                  <ExternalLink className="size-4" />
+                  <span className="sr-only">Visit {card.link}</span>
+                </Button>
+              </div>
             </div>
           </div>
         </CardContent>

@@ -3,6 +3,7 @@ import Collection from "@/pages/Collection"
 import Login from "@/pages/Login"
 import NotFoundPage from "@/pages/NotFound"
 import PostDetail from "@/pages/Post"
+import Settings from "@/pages/Settings"
 import { createBrowserRouter } from "react-router-dom"
 
 const router = createBrowserRouter(
@@ -26,6 +27,10 @@ const router = createBrowserRouter(
         {
           path: "/post/:post_id/edit",
           element: <PostDetail />
+        },
+        {
+          path: "/settings",
+          element: <Settings />
         }
       ]
     },

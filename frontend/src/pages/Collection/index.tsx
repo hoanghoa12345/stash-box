@@ -122,7 +122,7 @@ export default function Collection() {
               <Button
                 onClick={() =>
                   navigate(
-                    `/p/create?collection_id=${
+                    `/post/create?collection_id=${
                       collection?.data?.id || collectionId
                     }`
                   )
