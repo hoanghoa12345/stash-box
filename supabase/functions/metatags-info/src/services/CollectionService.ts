@@ -20,7 +20,7 @@ class CollectionService {
     const connection = await this.pool.connect();
     let query = `SELECT c.id, c.name, c.parent_id, c.icon, c.updated_at, COUNT(p.id) AS total_posts 
         FROM sb_collections c LEFT JOIN sb_posts p ON c.id=p.collection_id 
-        WHERE c.user_id=$1 AND c.deleted_at IS NULL GROUP BY c.id, c.name`;
+        WHERE c.user_id=$1 AND c.deleted_at IS NULL AND p.deleted_at IS NULL GROUP BY c.id, c.name`;
     const params: unknown[] = [userId];
 
     if (offset >= 0) {

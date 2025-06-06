@@ -64,8 +64,6 @@ export default function PostDetail() {
     refetchOnReconnect: false
   })
 
-  console.log(postId, post, isDirty)
-
   const mutation = useMutation({
     mutationFn: (data: PostCreateData) => {
       return postId
@@ -176,9 +174,9 @@ export default function PostDetail() {
   }, [post, collections?.data, isDirty])
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
+      <header className="bg-white border-b border-current sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-4">
@@ -264,7 +262,7 @@ export default function PostDetail() {
                   </Label>
                   <select
                     id="category"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-transparent"
                     onChange={(e) => {
                       setSelectedCollection(
                         collections?.data.find(
