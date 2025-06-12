@@ -1,42 +1,48 @@
-import React from "react"
+import React from "react";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle
-} from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { ExternalLink } from "lucide-react"
-import { Post } from "@/types"
-import { Button } from "../ui/button"
-import { MoreOptionMenu } from "./menu"
-import logo from "@/assets/logo.svg"
-import { toast } from "sonner"
-import { useNavigate } from "react-router-dom"
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { ExternalLink } from "lucide-react";
+import { Post } from "@/types";
+import { Button } from "../ui/button";
+import { MoreOptionMenu } from "./menu";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 export enum PostType {
   POST_TYPE_TEXT = 1,
-  POST_TYPE_LINK = 2
+  POST_TYPE_LINK = 2,
 }
 
 type LinkCardProps = {
-  card: Post
-  onClick?: () => void
-  onDelete?: () => void
-}
+  card: Post;
+  onClick?: () => void;
+  onDelete?: () => void;
+};
 
 const LinkCard = ({ card, onClick, onDelete }: LinkCardProps) => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const handleOpenLink = (e: React.MouseEvent) => {
-    e.stopPropagation()
+    e.stopPropagation();
     if (card.link) {
-      window.open(card.link, "_blank", "noopener,noreferrer")
+      window.open(card.link, "_blank", "noopener,noreferrer");
     } else {
-      toast.error("Link not found")
+      toast.error("Link not found");
     }
-  }
+  };
+
+  const handleImageError = (
+    e: React.SyntheticEvent<HTMLImageElement, Event>
+  ) => {
+    e.currentTarget.onerror = null;
+    e.currentTarget.src = "/images/placeholder.webp";
+  };
 
   return (
     <>
@@ -47,9 +53,10 @@ const LinkCard = ({ card, onClick, onDelete }: LinkCardProps) => {
         {card.type === PostType.POST_TYPE_LINK && card.image_url && (
           <div className="aspect-video overflow-hidden">
             <img
-              src={card.image_url || logo}
+              src={card.image_url}
               alt={card.title}
               className="size-full object-cover group-hover:scale-105 transition-transform duration-200"
+              onError={handleImageError}
             />
           </div>
         )}
@@ -106,7 +113,7 @@ const LinkCard = ({ card, onClick, onDelete }: LinkCardProps) => {
         </CardContent>
       </Card>
     </>
-  )
-}
+  );
+};
 
-export default LinkCard
+export default LinkCard;

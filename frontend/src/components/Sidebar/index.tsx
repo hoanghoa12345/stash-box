@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState } from "react";
 import {
   Sidebar,
   SidebarContent,
@@ -8,19 +8,19 @@ import {
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
-  SidebarMenuItem
-} from "@/components/ui/sidebar"
-import { Folder } from "lucide-react"
-import { ICollection, UpsetCollection } from "@/types"
-import { toast } from "sonner"
-import SidebarItem from "./item"
-import { Skeleton } from "../ui/skeleton"
-import CreateCollectionDialog from "../Dialog/CreateCollectionDialog"
-import { CollectionService } from "@/services/CollectionService"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { handleError } from "@/utils"
-import { DeleteAlert } from "../Alert/DeleteAlert"
-import { useNavigate } from "react-router-dom"
+  SidebarMenuItem,
+} from "@/components/ui/sidebar";
+import { Folder } from "lucide-react";
+import { ICollection, UpsetCollection } from "@/types";
+import { toast } from "sonner";
+import SidebarItem from "./item";
+import { Skeleton } from "../ui/skeleton";
+import CreateCollectionDialog from "../Dialog/CreateCollectionDialog";
+import { CollectionService } from "@/services/CollectionService";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { handleError } from "@/utils";
+import { DeleteAlert } from "../Alert/DeleteAlert";
+import { useNavigate, useParams } from "react-router-dom";
 
 const unCategorized: ICollection = {
   id: null,
@@ -30,108 +30,120 @@ const unCategorized: ICollection = {
   parent_id: null,
   icon: "📂",
   updated_at: new Date().toISOString(),
-  deleted_at: null
-}
+  deleted_at: null,
+};
 
 const AppSidebar = () => {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const params = useParams();
+  const collectionId = params.collection_id;
   const [selectedCollection, setSelectedCollection] =
-    useState<ICollection | null>(null)
-  const [isOpenDeleteAlert, setIsOpenDeleteAlert] = useState(false)
+    useState<ICollection | null>(null);
+  const [isOpenDeleteAlert, setIsOpenDeleteAlert] = useState(false);
   const [editedCollection, setEditedCollection] = useState<ICollection | null>(
     null
-  )
-  const navigate = useNavigate()
+  );
   const {
     data: collections,
     error,
-    isLoading
+    isLoading,
   } = useQuery({
     queryKey: ["collections"],
     queryFn: () =>
       CollectionService.getCollections({
         offset: -1,
-        limit: 50
-      })
-  })
+        limit: 50,
+      }),
+  });
   const mutation = useMutation({
     mutationFn: ({ name, icon, collectionId }: UpsetCollection) =>
       collectionId
         ? CollectionService.updateCollection({
             id: collectionId,
             name,
-            icon
+            icon,
           })
         : CollectionService.createCollection({
             name,
-            icon
+            icon,
           }),
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["collections"] })
-      toast.success(data.msg)
-      setIsCreateModalOpen(false)
-      setEditedCollection(null)
+      queryClient.invalidateQueries({ queryKey: ["collections"] });
+      toast.success(data.msg);
+      setIsCreateModalOpen(false);
+      setEditedCollection(null);
     },
     onError: (error) => {
-      handleError(toast, error)
-    }
-  })
+      handleError(toast, error);
+    },
+  });
 
   const deleteMutation = useMutation({
     mutationFn: CollectionService.removeCollection,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["collections"] })
-      toast.success("Collection deleted successfully")
-      setIsOpenDeleteAlert(false)
-      setSelectedCollection?.(null)
+      queryClient.invalidateQueries({ queryKey: ["collections"] });
+      toast.success("Collection deleted successfully");
+      setIsOpenDeleteAlert(false);
+      setSelectedCollection?.(null);
     },
     onError: () => {
-      toast.error("Failed to delete collection")
-    }
-  })
+      toast.error("Failed to delete collection");
+    },
+  });
 
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const handleCreateCollection = async ({
     name,
     icon,
-    collectionId
+    collectionId,
   }: UpsetCollection) => {
     if (!name.trim()) {
-      toast.error("Collection name cannot be empty")
-      return
+      toast.error("Collection name cannot be empty");
+      return;
     }
 
     mutation.mutate({
       name,
       icon,
-      collectionId
-    })
-  }
+      collectionId,
+    });
+  };
 
   const handleNavigateCollection = (collection: ICollection) => {
-    setSelectedCollection?.(collection)
+    setSelectedCollection?.(collection);
     if (collection.id === unCategorized.id) {
-      navigate("/")
-      return
+      navigate("/");
+      return;
     }
-    navigate(`/collection/${collection.id}`)
-  }
+    navigate(`/collection/${collection.id}`);
+  };
 
   const handleEditCollection = (collection: ICollection) => {
-    setEditedCollection(collection)
-    setIsCreateModalOpen(true)
-  }
+    setEditedCollection(collection);
+    setIsCreateModalOpen(true);
+  };
 
   const handleDeleteCollection = (collection: ICollection) => {
-    setSelectedCollection?.(collection)
-    setIsOpenDeleteAlert(true)
-  }
+    setSelectedCollection?.(collection);
+    setIsOpenDeleteAlert(true);
+  };
 
   useEffect(() => {
     if (error) {
-      handleError(toast, error)
+      handleError(toast, error);
     }
-  }, [error])
+  }, [error]);
+
+  useEffect(() => {
+    if (collectionId && collectionId !== "null") {
+      setSelectedCollection(
+        collections?.data?.find(
+          (collection) => collection.id === collectionId
+        ) || unCategorized
+      );
+    }
+  }, [collections]);
 
   if (isLoading) {
     return (
@@ -148,7 +160,7 @@ const AppSidebar = () => {
           </div>
         </SidebarHeader>
       </Sidebar>
-    )
+    );
   }
 
   return (
@@ -214,11 +226,11 @@ const AppSidebar = () => {
         onOpenChange={setIsOpenDeleteAlert}
         onConfirm={() => {
           if (selectedCollection?.id)
-            deleteMutation.mutate({ id: selectedCollection.id })
+            deleteMutation.mutate({ id: selectedCollection.id });
         }}
       />
     </>
-  )
-}
+  );
+};
 
-export default AppSidebar
+export default AppSidebar;

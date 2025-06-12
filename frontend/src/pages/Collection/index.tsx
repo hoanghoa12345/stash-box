@@ -18,6 +18,7 @@ import { PostService } from "@/services/PostService";
 import { handleError } from "@/utils";
 import { CollectionService } from "@/services/CollectionService";
 import { DeleteAlert } from "@/components/Alert/DeleteAlert";
+import CardSkeleton from "@/components/Card/CardSkeleton";
 
 const PER_PAGE = 20;
 
@@ -106,7 +107,7 @@ export default function Collection() {
             {isLoading ? (
               <>
                 {Array.from({ length: 8 }).map((_, index) => (
-                  <Skeleton key={index} className="h-64 w-full rounded-lg" />
+                  <CardSkeleton key={index} />
                 ))}
               </>
             ) : (
