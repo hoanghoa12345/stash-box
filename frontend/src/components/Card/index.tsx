@@ -13,6 +13,7 @@ import { Button } from "../ui/button";
 import { MoreOptionMenu } from "./menu";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { getImageUrl } from "@/utils";
 
 export enum PostType {
   POST_TYPE_TEXT = 1,
@@ -41,7 +42,7 @@ const LinkCard = ({ card, onClick, onDelete }: LinkCardProps) => {
     e: React.SyntheticEvent<HTMLImageElement, Event>
   ) => {
     e.currentTarget.onerror = null;
-    e.currentTarget.src = "/images/placeholder.webp";
+    e.currentTarget.src = getImageUrl("images/placeholder.webp");
   };
 
   return (

@@ -31,7 +31,7 @@ const SidebarItem = ({
           </div>
           <span className="flex-1">{collection.name}</span>
         </div>
-        <div className="flex space-x-2">
+        <div className="flex space-x-2 w-16">
           <MoreOptionMenu
             onEdit={() => onEdit?.(collection)}
             onDelete={() => onDelete?.(collection)}
