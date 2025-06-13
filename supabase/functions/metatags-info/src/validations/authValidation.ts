@@ -5,12 +5,17 @@ type SignUpData = {
   password: string;
 };
 
+type SignInData = {
+  email: string;
+  password: string;
+};
+
 const SignInSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
 });
 
-export const signInValidation = (data: SignUpData) => {
+export const signInValidation = (data: SignInData) => {
   const result = SignInSchema.safeParse(data);
   if (!result.success) {
     return {

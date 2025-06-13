@@ -48,7 +48,7 @@ class PostService {
       params.limit = limit;
     }
 
-    const result = await connection.queryObject(query, params);
+    const result = await connection.queryObject<Post>(query, params);
     connection.release();
 
     return result.rows;

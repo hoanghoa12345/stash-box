@@ -1,55 +1,68 @@
-import React from "react";
+import React from "react"
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { ExternalLink } from "lucide-react";
-import { Post } from "@/types";
-import { Button } from "../ui/button";
-import { MoreOptionMenu } from "./menu";
-import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
-import { getImageUrl } from "@/utils";
+  CardTitle
+} from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { ExternalLink } from "lucide-react"
+import { Post } from "@/types"
+import { Button } from "../ui/button"
+import { MoreOptionMenu } from "./menu"
+import { toast } from "sonner"
+import { useNavigate } from "react-router-dom"
+import { getImageUrl } from "@/utils"
+import { cn } from "@/lib/utils"
 
 export enum PostType {
   POST_TYPE_TEXT = 1,
-  POST_TYPE_LINK = 2,
+  POST_TYPE_LINK = 2
 }
 
 type LinkCardProps = {
-  card: Post;
-  onClick?: () => void;
-  onDelete?: () => void;
-};
+  card: Post
+  className?: string
+  onClick?: () => void
+  onDelete?: () => void
+}
 
-const LinkCard = ({ card, onClick, onDelete }: LinkCardProps) => {
-  const navigate = useNavigate();
+const LinkCard = ({ card, className, onClick, onDelete }: LinkCardProps) => {
+  const navigate = useNavigate()
 
   const handleOpenLink = (e: React.MouseEvent) => {
-    e.stopPropagation();
+    e.stopPropagation()
     if (card.link) {
-      window.open(card.link, "_blank", "noopener,noreferrer");
+      window.open(card.link, "_blank", "noopener,noreferrer")
     } else {
-      toast.error("Link not found");
+      toast.error("Link not found")
     }
-  };
+  }
 
   const handleImageError = (
     e: React.SyntheticEvent<HTMLImageElement, Event>
   ) => {
-    e.currentTarget.onerror = null;
-    e.currentTarget.src = getImageUrl("images/placeholder.webp");
-  };
+    e.currentTarget.onerror = null
+    e.currentTarget.src = getImageUrl("images/placeholder.webp")
+  }
+
+  const handleEditPost = () => {
+    let editUrl = `/post/${card.id}/edit`
+    if (card.collection_id) {
+      editUrl += `?collection_id=${card.collection_id}`
+    }
+    navigate(editUrl)
+  }
 
   return (
     <>
       <Card
         key={card.id}
-        className="group hover:shadow-lg transition-all duration-200 cursor-pointer overflow-hidden"
+        className={cn(
+          "group hover:shadow-lg transition-all duration-200 cursor-pointer overflow-hidden",
+          className
+        )}
       >
         {card.type === PostType.POST_TYPE_LINK && card.image_url && (
           <div className="aspect-video overflow-hidden">
@@ -63,15 +76,19 @@ const LinkCard = ({ card, onClick, onDelete }: LinkCardProps) => {
         )}
 
         <CardHeader
-          className={card.type === PostType.POST_TYPE_LINK ? "pb-2" : "pb-3"}
+          className={cn(
+            card.type === PostType.POST_TYPE_LINK ? "pb-2" : "pb-3"
+          )}
         >
           <div className="flex items-start justify-between gap-2">
             <CardTitle
+              role="button"
               onClick={onClick}
               className="text-base group-hover:text-primary transition-colors line-clamp-2"
             >
               {card.title}
             </CardTitle>
+            <MoreOptionMenu onEdit={handleEditPost} onDelete={onDelete} />
           </div>
           <CardDescription className="text-sm line-clamp-2">
             {card.content}
@@ -81,24 +98,17 @@ const LinkCard = ({ card, onClick, onDelete }: LinkCardProps) => {
         <CardContent className="pt-0">
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              {/* {card.favicon && <img src={card.favicon} alt="favicon" className="size-4" />} */}
-              <span className="text-xs text-muted-foreground truncate">
-                {card.link}
-              </span>
+              <a href={card.link} target="_blank" rel="noopener noreferrer">
+                <span className="text-xs text-muted-foreground truncate">
+                  {card.link}
+                </span>
+              </a>
             </div>
             <div className="flex items-center justify-between">
               <Badge variant="outline" className="text-xs">
                 {card.collection_name || "Uncategorized"}
               </Badge>
               <div className="flex items-center gap-2">
-                <MoreOptionMenu
-                  onEdit={() =>
-                    navigate(
-                      `/post/${card.id}/edit?collection_id=${card.collection_id}`
-                    )
-                  }
-                  onDelete={onDelete}
-                />
                 <Button
                   variant="ghost"
                   size="sm"
@@ -114,7 +124,7 @@ const LinkCard = ({ card, onClick, onDelete }: LinkCardProps) => {
         </CardContent>
       </Card>
     </>
-  );
-};
+  )
+}
 
-export default LinkCard;
+export default LinkCard

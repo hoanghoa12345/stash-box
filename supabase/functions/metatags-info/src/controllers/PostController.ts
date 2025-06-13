@@ -2,6 +2,7 @@ import { Context } from "../config/deps.ts";
 import PostService from "../services/PostService.ts";
 import { log } from "../utils/logger.ts";
 import { response } from "../utils/response.ts";
+import { getPostsValidation } from "../validations/postValidation.ts";
 
 class PostController {
   public static async index(ctx: Context) {
@@ -13,13 +14,26 @@ class PostController {
     const offset = parseInt(searchParams.get("offset") || "0", 10);
     const limit = parseInt(searchParams.get("limit") || "50", 10);
 
-    const result = await PostService.all(
-      userId,
+    const { validatedData, error, message } = getPostsValidation({
       collectionId,
       isUnCategorized,
       filter,
       offset,
-      limit
+      limit,
+    });
+
+    if (error) {
+      response(ctx, 400, message);
+      return;
+    }
+
+    const result = await PostService.all(
+      userId,
+      validatedData.collectionId,
+      validatedData.isUnCategorized,
+      validatedData.filter,
+      validatedData.offset,
+      validatedData.limit
     );
     response(ctx, 200, "Posts retrieved successfully!", result);
   }

@@ -36,7 +36,7 @@ export class AuthService {
   }
 
   public static async logout(): Promise<void> {
-    await axios.post("/sign-out")
+    await axiosClient.post("/sign-out")
     Cookies.remove("access_token")
     Cookies.remove("refresh_token")
   }

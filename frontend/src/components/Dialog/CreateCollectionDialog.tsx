@@ -77,14 +77,14 @@ const CreateCollectionDialog = ({
                 className="w-16 text-center text-lg"
                 maxLength={2}
               />
-              <div className="flex gap-1">
+              <div className="flex gap-1 overflow-x-auto">
                 {["📁", "📚", "🎨", "⚙️", "🎬", "📄", "💼", "🔗"].map(
                   (emoji) => (
                     <Button
                       key={emoji}
                       variant="ghost"
                       size="sm"
-                      className="h-8 w-8 p-0 text-lg"
+                      className="h-8 w-8 px-2 py-0 text-lg"
                       onClick={() => setNewCollectionEmoji(emoji)}
                     >
                       {emoji}
@@ -96,21 +96,28 @@ const CreateCollectionDialog = ({
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => setIsOpen(false)}>
-            Cancel
-          </Button>
-          <Button
-            onClick={() =>
-              onSubmit({
-                name: newCollectionName,
-                icon: newCollectionEmoji,
-                collectionId: initialData?.id
-              })
-            }
-            disabled={!newCollectionName.trim()}
-          >
-            {initialData ? "Update Collection" : "Create Collection"}
-          </Button>
+          <div className="flex flex-col sm:flex-row items-center gap-2">
+            <Button
+              variant="outline"
+              className="w-full sm:w-auto"
+              onClick={() => setIsOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              className="w-full sm:w-auto"
+              onClick={() =>
+                onSubmit({
+                  name: newCollectionName,
+                  icon: newCollectionEmoji,
+                  collectionId: initialData?.id
+                })
+              }
+              disabled={!newCollectionName.trim()}
+            >
+              {initialData ? "Update Collection" : "Create Collection"}
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

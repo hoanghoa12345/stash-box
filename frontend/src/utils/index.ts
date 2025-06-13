@@ -7,7 +7,12 @@ export function classNames(...classes: unknown[]): string {
 
 export const handleError = (toast: ToastInstance, err: Error) => {
   const errDetail = (err as ApiError).response?.data.msg
-  const errorMessage = errDetail || err.message || "Something went wrong."
+  let errorMessage = ""
+  if (typeof errDetail === "string") {
+    errorMessage = errDetail
+  } else {
+    errorMessage = err.message || "Something went wrong."
+  }
 
   toast.error(errorMessage)
 }

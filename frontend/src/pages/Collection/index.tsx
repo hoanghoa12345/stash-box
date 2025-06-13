@@ -1,34 +1,34 @@
-import { Button } from "@/components/ui/button";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { Folder, Loader2 } from "lucide-react";
-import React, { useEffect, useState } from "react";
-import { toast } from "sonner";
-import { useNavigate, useParams } from "react-router-dom";
-import AppSidebar from "@/components/Sidebar";
-import AppHeader from "@/components/Header";
-import LinkCard from "@/components/Card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button"
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
+import { Folder, Loader2 } from "lucide-react"
+import React, { useEffect, useState } from "react"
+import { toast } from "sonner"
+import { useNavigate, useParams } from "react-router-dom"
+import AppSidebar from "@/components/Sidebar"
+import AppHeader from "@/components/Header"
+import LinkCard from "@/components/Card"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   useInfiniteQuery,
   useMutation,
   useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
-import { PostService } from "@/services/PostService";
-import { handleError } from "@/utils";
-import { CollectionService } from "@/services/CollectionService";
-import { DeleteAlert } from "@/components/Alert/DeleteAlert";
-import CardSkeleton from "@/components/Card/CardSkeleton";
+  useQueryClient
+} from "@tanstack/react-query"
+import { PostService } from "@/services/PostService"
+import { handleError } from "@/utils"
+import { CollectionService } from "@/services/CollectionService"
+import { DeleteAlert } from "@/components/Alert/DeleteAlert"
+import CardSkeleton from "@/components/Card/CardSkeleton"
 
-const PER_PAGE = 20;
+const PER_PAGE = 8
 
 export default function Collection() {
-  const navigate = useNavigate();
-  const params = useParams();
-  const collectionId = params.collection_id;
-  const queryClient = useQueryClient();
-  const [isOpenDeleteAlert, setIsOpenDeleteAlert] = useState(false);
-  const [deleteId, setDeleteId] = useState("");
+  const navigate = useNavigate()
+  const params = useParams()
+  const collectionId = params.collection_id
+  const queryClient = useQueryClient()
+  const [isOpenDeleteAlert, setIsOpenDeleteAlert] = useState(false)
+  const [deleteId, setDeleteId] = useState("")
   const {
     data: posts,
     isLoading,
@@ -36,7 +36,7 @@ export default function Collection() {
     fetchNextPage,
     hasNextPage,
     isFetching,
-    isFetchingNextPage,
+    isFetchingNextPage
   } = useInfiniteQuery({
     queryKey: ["posts", collectionId],
     queryFn: ({ pageParam = 0 }) =>
@@ -45,55 +45,63 @@ export default function Collection() {
         isUnCategorized: !collectionId,
         filter: "",
         offset: pageParam,
-        limit: PER_PAGE,
+        limit: PER_PAGE
       }),
     initialPageParam: 0,
     getNextPageParam: (lastPage, pages) => {
       if (lastPage.data.length < PER_PAGE) {
-        return;
+        return
       }
-      return PER_PAGE * pages.length;
-    },
-  });
+      return PER_PAGE * pages.length
+    }
+  })
 
   const { data: collection } = useQuery({
     queryKey: ["collection", collectionId],
     queryFn: () =>
       CollectionService.getCollection({
-        id: collectionId || "",
+        id: collectionId || ""
       }),
     enabled: () => {
       if (collectionId && collectionId !== "null") {
-        return true;
+        return true
       }
-      return false;
-    },
-  });
+      return false
+    }
+  })
 
   const deleteMutation = useMutation({
     mutationFn: PostService.deletePost,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["posts"] });
-      toast.success("Post deleted successfully");
-      setIsOpenDeleteAlert(false);
-      setDeleteId("");
+      queryClient.invalidateQueries({ queryKey: ["posts"] })
+      toast.success("Post deleted successfully")
+      setIsOpenDeleteAlert(false)
+      setDeleteId("")
     },
     onError: () => {
-      toast.error("Failed to delete post");
-    },
-  });
+      toast.error("Failed to delete post")
+    }
+  })
 
   const handleDeletePost = () => {
     if (deleteId) {
-      deleteMutation.mutate({ id: deleteId });
+      deleteMutation.mutate({ id: deleteId })
     }
-  };
+  }
+
+  const handleCardClick = (cardId: string, collectionId: string | null) => {
+    let navigateUrl = `/post/${cardId}`
+    if (collectionId) {
+      navigateUrl += `?collection_id=${collectionId}`
+    }
+    navigate(navigateUrl)
+  }
 
   useEffect(() => {
     if (error) {
-      handleError(toast, error);
+      handleError(toast, error)
     }
-  }, [error]);
+  }, [error])
 
   return (
     <SidebarProvider>
@@ -118,14 +126,12 @@ export default function Collection() {
                       <LinkCard
                         card={card}
                         key={card.id}
-                        onClick={() => {
-                          navigate(
-                            `/post/${card.id}?collection_id=${card.collection_id}`
-                          );
-                        }}
+                        onClick={() =>
+                          handleCardClick(card.id, card.collection_id)
+                        }
                         onDelete={() => {
-                          setIsOpenDeleteAlert(true);
-                          setDeleteId(card.id);
+                          setIsOpenDeleteAlert(true)
+                          setDeleteId(card.id)
                         }}
                       />
                     ))}
@@ -189,5 +195,5 @@ export default function Collection() {
         </div>
       </SidebarInset>
     </SidebarProvider>
-  );
+  )
 }

@@ -154,7 +154,7 @@ export default function Settings() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-muted border-current border-b sticky top-0 z-10">
+      <header className="bg-muted border-b sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-4">
@@ -165,7 +165,7 @@ export default function Settings() {
               <div className="flex flex-col">
                 <h1 className="text-lg font-semibold">Settings</h1>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-400">
+                  <span className="hidden md:block text-sm text-gray-400">
                     Customize your experience
                   </span>
                   {hasUnsavedChanges && (
@@ -176,7 +176,7 @@ export default function Settings() {
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="hidden mb:flex items-center gap-2">
               <Button variant="outline" size="sm" onClick={handleReset}>
                 Reset
               </Button>

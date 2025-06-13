@@ -1,20 +1,20 @@
-import type React from "react";
+import type React from "react"
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Save, X, Eye, Clock, Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { PostService } from "@/services/PostService";
-import { ICollection, PostCreateData } from "@/types";
-import { CollectionService } from "@/services/CollectionService";
-import { toast } from "sonner";
-import { handleError } from "@/utils";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { ArrowLeft, Save, X, Eye, Clock, Loader2 } from "lucide-react"
+import { useEffect, useState } from "react"
+import { useNavigate, useParams, useSearchParams } from "react-router-dom"
+import { PostService } from "@/services/PostService"
+import { ICollection, PostCreateData } from "@/types"
+import { CollectionService } from "@/services/CollectionService"
+import { toast } from "sonner"
+import { handleError } from "@/utils"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 const unCategorizedCollection: ICollection = {
   id: null,
@@ -24,45 +24,45 @@ const unCategorizedCollection: ICollection = {
   parent_id: null,
   icon: "📂",
   updated_at: new Date().toISOString(),
-  deleted_at: null,
-};
+  deleted_at: null
+}
 
 export default function PostDetail() {
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [isDirty, setIsDirty] = useState(false);
+  const [title, setTitle] = useState("")
+  const [content, setContent] = useState("")
+  const [isDirty, setIsDirty] = useState(false)
   const [selectedCollection, setSelectedCollection] =
-    useState<ICollection | null>(null);
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const queryClient = useQueryClient();
-  const params = useParams();
+    useState<ICollection | null>(null)
+  const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const queryClient = useQueryClient()
+  const params = useParams()
   const postId =
-    params.post_id && params.post_id !== "create" ? params.post_id : null;
-  const collectionId = searchParams.get("collection_id");
+    params.post_id && params.post_id !== "create" ? params.post_id : null
+  const collectionId = searchParams.get("collection_id")
   const {
     data: collections,
     error,
-    isLoading,
+    isLoading
   } = useQuery({
     queryKey: ["collections"],
     queryFn: () =>
       CollectionService.getCollections({
         offset: -1,
-        limit: 50,
-      }),
-  });
+        limit: 50
+      })
+  })
 
   const { data: post } = useQuery({
     queryKey: ["post", postId],
     queryFn: () =>
       PostService.getPost({
-        id: postId || "",
+        id: postId || ""
       }),
     enabled: !!postId,
     refetchOnMount: false,
-    refetchOnReconnect: false,
-  });
+    refetchOnReconnect: false
+  })
 
   const mutation = useMutation({
     mutationFn: (data: PostCreateData) => {
@@ -73,110 +73,110 @@ export default function PostDetail() {
             content: data.content,
             collectionId: data.collectionId,
             imageUrl: post?.data.image_url,
-            link: post?.data.link,
+            link: post?.data.link
           })
         : PostService.createPost({
             title: data.title,
             content: data.content,
-            collectionId: data.collectionId,
-          });
+            collectionId: data.collectionId
+          })
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["posts"] });
-      toast.success(data.msg);
+      queryClient.invalidateQueries({ queryKey: ["posts"] })
+      toast.success(data.msg)
       // clear fields after saving
-      setTitle("");
-      setContent("");
-      setSelectedCollection(null);
+      setTitle("")
+      setContent("")
+      setSelectedCollection(null)
       // Navigate back to dashboard or posts list
       if (collectionId) {
-        navigate(`/collection/${collectionId}`);
+        navigate(`/collection/${collectionId}`)
       } else {
-        navigate("/");
+        navigate("/")
       }
     },
     onError: (error) => {
-      handleError(toast, error);
-    },
-  });
+      handleError(toast, error)
+    }
+  })
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setTitle(e.target.value);
-    setIsDirty(true);
-  };
+    setTitle(e.target.value)
+    setIsDirty(true)
+  }
 
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setContent(e.target.value);
-    setIsDirty(true);
-  };
+    setContent(e.target.value)
+    setIsDirty(true)
+  }
 
   const handleSave = async () => {
-    setIsDirty(false);
+    setIsDirty(false)
     mutation.mutate({
       title: title.trim(),
       content: content.trim(),
-      collectionId: selectedCollection?.id || null,
-    });
-  };
+      collectionId: selectedCollection?.id || null
+    })
+  }
 
   const handleCancel = () => {
     if (isDirty) {
       const confirmLeave = window.confirm(
         "You have unsaved changes. Are you sure you want to leave?"
-      );
-      if (!confirmLeave) return;
+      )
+      if (!confirmLeave) return
     }
 
     if (collectionId) {
-      navigate(`/collection/${collectionId}`);
+      navigate(`/collection/${collectionId}`)
     } else {
-      navigate("/");
+      navigate("/")
     }
-  };
+  }
 
   const handlePreview = () => {
     // Handle preview logic here
-    console.log("Opening preview");
-  };
+    console.log("Opening preview")
+  }
 
   const wordCount = content
     .trim()
     .split(/\s+/)
-    .filter((word) => word.length > 0).length;
-  const charCount = content.length;
+    .filter((word) => word.length > 0).length
+  const charCount = content.length
 
   useEffect(() => {
     if (error) {
-      handleError(toast, error);
+      handleError(toast, error)
     }
-  }, [error]);
+  }, [error])
 
   useEffect(() => {
-    const collectionId = searchParams.get("collection_id");
+    const collectionId = searchParams.get("collection_id")
     if (collectionId) {
       const collection = collections?.data?.find(
         (collection) => collection.id === collectionId
-      );
-      setSelectedCollection(collection || unCategorizedCollection);
+      )
+      setSelectedCollection(collection || unCategorizedCollection)
     }
-  }, [collections?.data, navigate, searchParams]);
+  }, [collections?.data, navigate, searchParams])
 
   useEffect(() => {
     if (post && !isDirty) {
-      setTitle(post.data.title || "");
-      setContent(post.data.content || "");
+      setTitle(post.data.title || "")
+      setContent(post.data.content || "")
       setSelectedCollection(
         collections?.data?.find(
           (collection) => collection.id === post.data.collection_id
         ) || unCategorizedCollection
-      );
+      )
     }
-  }, [post, collections?.data]);
+  }, [post, collections?.data])
 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-muted border-b border-current sticky top-0 z-10">
+      <header className="bg-muted border-b sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-4">
@@ -190,7 +190,7 @@ export default function PostDetail() {
                 </h1>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Clock className="h-3 w-3" />
-                  <span>Draft</span>
+                  <span className="text-xs md:text-sm">Draft</span>
                   {isDirty && (
                     <Badge variant="secondary" className="text-xs">
                       Unsaved changes
@@ -199,7 +199,7 @@ export default function PostDetail() {
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="hidden md:flex items-center gap-2">
               <Button
                 className="hidden md:block"
                 variant="outline"
@@ -217,7 +217,7 @@ export default function PostDetail() {
                 {mutation.isPending ? (
                   <>
                     <Loader2 className="animate-spin h-4 w-4" />{" "}
-                    <span>Loading</span>
+                    <span>Saving...</span>
                   </>
                 ) : (
                   <>
@@ -271,8 +271,8 @@ export default function PostDetail() {
                         collections?.data.find(
                           (collection) => collection.id === e.target.value
                         ) || null
-                      );
-                      setIsDirty(true);
+                      )
+                      setIsDirty(true)
                     }}
                     value={selectedCollection?.id || ""}
                     defaultValue={unCategorizedCollection.id || ""}
@@ -280,7 +280,7 @@ export default function PostDetail() {
                   >
                     {[
                       unCategorizedCollection,
-                      ...(collections?.data || []),
+                      ...(collections?.data || [])
                     ].map((collection) => (
                       <option key={collection.id} value={collection.id || ""}>
                         {collection.name}
@@ -322,7 +322,10 @@ export default function PostDetail() {
             className="w-full"
           >
             {mutation.isPending ? (
-              <Loader2 className="size-4 animate-spin" />
+              <>
+                <Loader2 className="size-4 animate-spin" />
+                <span>Saving...</span>
+              </>
             ) : (
               <>
                 <Save className="h-4 w-4 mr-2" />
@@ -337,5 +340,5 @@ export default function PostDetail() {
         </div>
       </main>
     </div>
-  );
+  )
 }
