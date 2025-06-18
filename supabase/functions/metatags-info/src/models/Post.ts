@@ -11,6 +11,7 @@ export interface Post {
   type?: number;
   order?: number;
   deleted_at?: string | null;
+  image_original_url?: string | null;
 }
 export enum PostType {
   POST_TYPE_TEXT = 1,

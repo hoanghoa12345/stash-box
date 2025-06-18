@@ -1,4 +1,5 @@
 import { Context } from "../config/deps.ts";
+import { PostUpdate } from "../models/Post.ts";
 import PostService from "../services/PostService.ts";
 import { log } from "../utils/logger.ts";
 import { response } from "../utils/response.ts";
@@ -23,17 +24,17 @@ class PostController {
     });
 
     if (error) {
-      response(ctx, 400, message);
+      response(ctx, 400, "", message);
       return;
     }
 
     const result = await PostService.all(
       userId,
-      validatedData.collectionId,
-      validatedData.isUnCategorized,
-      validatedData.filter,
-      validatedData.offset,
-      validatedData.limit
+      validatedData?.collectionId,
+      validatedData?.isUnCategorized,
+      validatedData?.filter,
+      validatedData?.offset,
+      validatedData?.limit
     );
     response(ctx, 200, "Posts retrieved successfully!", result);
   }
@@ -98,7 +99,7 @@ class PostController {
         return;
       }
 
-      const { title, content, collectionId, imageUrl, link } = jsonBody;
+      const { title, content, collectionId, imageUrl, link, type } = jsonBody;
 
       if (!title || !content) {
         response(ctx, 400, "Title and content are required");
@@ -106,13 +107,14 @@ class PostController {
       }
 
       const userId = ctx.state.user.id;
-      const updateData = {
+      const updateData: PostUpdate = {
         user_id: userId,
         title,
         content,
         collection_id: collectionId || null,
         image_url: imageUrl || null,
         link: link || null,
+        type
       };
       const result = await PostService.update(post_id, updateData);
 

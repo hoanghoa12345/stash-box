@@ -26,6 +26,7 @@ CREATE TABLE "public"."sb_posts" (
     "type" int2 NOT NULL DEFAULT 1,
     "order" int4 NOT NULL DEFAULT 0,
     "deleted_at" timestamptz,
+    "image_original_url" text,
     CONSTRAINT "sb_posts_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "auth"."users"("id"),
     CONSTRAINT "sb_posts_sb_collection_id_fkey" FOREIGN KEY ("collection_id") REFERENCES "public"."sb_collections"("id"),
     PRIMARY KEY ("id")
