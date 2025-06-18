@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 import {
   Sidebar,
   SidebarContent,
@@ -9,26 +9,27 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar";
-import { Folder } from "lucide-react";
-import { ICollection, UpsetCollection } from "@/types";
-import { toast } from "sonner";
-import SidebarItem from "./item";
-import { Skeleton } from "../ui/skeleton";
-import CreateCollectionDialog from "../Dialog/CreateCollectionDialog";
-import { CollectionService } from "@/services/CollectionService";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { handleError } from "@/utils";
-import { DeleteAlert } from "../Alert/DeleteAlert";
-import { useNavigate, useParams } from "react-router-dom";
+} from '@/components/ui/sidebar';
+import { Folder, Plus } from 'lucide-react';
+import { ICollection, UpsetCollection } from '@/types';
+import { toast } from 'sonner';
+import SidebarItem from './item';
+import { Skeleton } from '../ui/skeleton';
+import CreateCollectionDialog from '../Dialog/CreateCollectionDialog';
+import { CollectionService } from '@/services/CollectionService';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { handleError } from '@/utils';
+import { DeleteAlert } from '../Alert/DeleteAlert';
+import { useNavigate, useParams } from 'react-router-dom';
+import { Button } from '../ui/button';
 
 const unCategorized: ICollection = {
   id: null,
-  name: "Uncategorized",
+  name: 'Uncategorized',
   created_at: new Date().toISOString(),
-  user_id: "",
+  user_id: '',
   parent_id: null,
-  icon: "📂",
+  icon: '📂',
   updated_at: new Date().toISOString(),
   deleted_at: null,
 };
@@ -42,14 +43,14 @@ const AppSidebar = () => {
     useState<ICollection | null>(null);
   const [isOpenDeleteAlert, setIsOpenDeleteAlert] = useState(false);
   const [editedCollection, setEditedCollection] = useState<ICollection | null>(
-    null
+    null,
   );
   const {
     data: collections,
     error,
     isLoading,
   } = useQuery({
-    queryKey: ["collections"],
+    queryKey: ['collections'],
     queryFn: () =>
       CollectionService.getCollections({
         offset: -1,
@@ -69,7 +70,7 @@ const AppSidebar = () => {
             icon,
           }),
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["collections"] });
+      queryClient.invalidateQueries({ queryKey: ['collections'] });
       toast.success(data.msg);
       setIsCreateModalOpen(false);
       setEditedCollection(null);
@@ -82,13 +83,13 @@ const AppSidebar = () => {
   const deleteMutation = useMutation({
     mutationFn: CollectionService.removeCollection,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["collections"] });
-      toast.success("Collection deleted successfully");
+      queryClient.invalidateQueries({ queryKey: ['collections'] });
+      toast.success('Collection deleted successfully');
       setIsOpenDeleteAlert(false);
       setSelectedCollection?.(null);
     },
     onError: () => {
-      toast.error("Failed to delete collection");
+      toast.error('Failed to delete collection');
     },
   });
 
@@ -99,7 +100,7 @@ const AppSidebar = () => {
     collectionId,
   }: UpsetCollection) => {
     if (!name.trim()) {
-      toast.error("Collection name cannot be empty");
+      toast.error('Collection name cannot be empty');
       return;
     }
 
@@ -113,7 +114,7 @@ const AppSidebar = () => {
   const handleNavigateCollection = (collection: ICollection) => {
     setSelectedCollection?.(collection);
     if (collection.id === unCategorized.id) {
-      navigate("/");
+      navigate('/');
       return;
     }
     navigate(`/collection/${collection.id}`);
@@ -136,11 +137,11 @@ const AppSidebar = () => {
   }, [error]);
 
   useEffect(() => {
-    if (collectionId && collectionId !== "null") {
+    if (collectionId && collectionId !== 'null') {
       setSelectedCollection(
         collections?.data?.find(
-          (collection) => collection.id === collectionId
-        ) || unCategorized
+          (collection) => collection.id === collectionId,
+        ) || unCategorized,
       );
     }
   }, [collections]);
@@ -188,7 +189,18 @@ const AppSidebar = () => {
                 setIsOpen={setIsCreateModalOpen}
                 onSubmit={handleCreateCollection}
                 initialData={editedCollection}
-              />
+                asChild
+              >
+                <Button
+                  onClick={() => setEditedCollection(null)}
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 w-6 p-0"
+                >
+                  <Plus className="h-4 w-4" />
+                  <span className="sr-only">Create new collection</span>
+                </Button>
+              </CreateCollectionDialog>
             </div>
             <SidebarGroupContent>
               <SidebarMenu>
@@ -213,7 +225,7 @@ const AppSidebar = () => {
                         onEdit={handleEditCollection}
                         onDelete={handleDeleteCollection}
                       />
-                    )
+                    ),
                   )
                 )}
               </SidebarMenu>

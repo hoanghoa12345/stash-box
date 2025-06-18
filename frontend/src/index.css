@@ -1,8 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
-
-body, #root {
-  font-family: "DM Sans", sans-serif;
-}
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -41,7 +37,7 @@ body, #root {
     --sidebar-accent-foreground: 216.9231 19.1176% 26.6667%;
     --sidebar-border: 267.5676 90.2439% 91.9608%;
     --sidebar-ring: 255.1351 91.7355% 76.2745%;
-    --font-sans: Open Sans, sans-serif;
+    --font-sans: Inter, sans-serif;
     --font-serif: Source Serif 4, serif;
     --font-mono: IBM Plex Mono, monospace;
     --radius: 1.5rem;
@@ -88,7 +84,7 @@ body, #root {
     --sidebar-accent-foreground: 216.0000 12.1951% 83.9216%;
     --sidebar-border: 272.5000 19.3548% 24.3137%;
     --sidebar-ring: 255.9036 95.4023% 82.9412%;
-    --font-sans: Open Sans, sans-serif;
+    --font-sans: Inter, sans-serif;
     --font-serif: Source Serif 4, serif;
     --font-mono: IBM Plex Mono, monospace;
     --radius: 1.5rem;

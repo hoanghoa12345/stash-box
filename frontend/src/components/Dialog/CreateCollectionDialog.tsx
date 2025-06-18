@@ -10,7 +10,6 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "../ui/button"
-import { Plus } from "lucide-react"
 import { useEffect, useState } from "react"
 import { ICollection, UpsetCollection } from "@/types"
 
@@ -19,13 +18,17 @@ type CreateCollectionDialogProps = {
   setIsOpen: (open: boolean) => void
   onSubmit: ({ name, icon, collectionId }: UpsetCollection) => void
   initialData?: ICollection | null
+  children?: React.ReactNode
+  asChild?: boolean
 }
 
 const CreateCollectionDialog = ({
   isOpen,
   setIsOpen,
   onSubmit,
-  initialData
+  initialData,
+  children,
+  asChild
 }: CreateCollectionDialogProps) => {
   const [newCollectionName, setNewCollectionName] = useState("")
   const [newCollectionEmoji, setNewCollectionEmoji] = useState("📁")
@@ -35,11 +38,8 @@ const CreateCollectionDialog = ({
   }, [initialData])
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-          <Plus className="h-4 w-4" />
-          <span className="sr-only">Create new collection</span>
-        </Button>
+      <DialogTrigger asChild={asChild}>
+        {children}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
