@@ -3,23 +3,25 @@ export interface Collection {
   user_id: string;
   name: string;
   created_at: string;
-  parent_id: string | null;
-  icon: string | null;
+  updated_at?: string | null;
+  parent_id?: string | null;
+  icon?: string | null;
+  total_posts?: number | string;
 }
 
 export interface CollectionCreate {
   name: string;
   userId: string;
-  parentCollectionId: string;
-  icon: string;
+  parentCollectionId?: string;
+  icon?: string;
 }
 
 export interface CollectionUpdate {
   id: string;
   name: string;
-  parentCollectionId: string;
+  parentCollectionId?: string;
   isRoot: boolean;
-  icon: string;
+  icon?: string;
   userId: string;
 }
 

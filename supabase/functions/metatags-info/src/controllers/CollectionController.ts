@@ -1,4 +1,4 @@
-import { Context } from "../config/deps.ts";
+import { Context, RouterContext } from "../config/deps.ts";
 import CollectionService from "../services/CollectionService.ts";
 import {
   collectionCreateValidation,
@@ -30,8 +30,8 @@ class CollectionController {
       const { validatedData, error, message } =
         collectionCreateValidation(jsonBody);
 
-      if (error) {
-        response(ctx, 400, message);
+      if (error || !validatedData) {
+        response(ctx, 400, "", message);
         return;
       }
       const { data, error: err } = await CollectionService.store({
@@ -48,7 +48,7 @@ class CollectionController {
     }
   }
 
-  public static async get(ctx: Context) {
+  public static async get(ctx: RouterContext<string>) {
     const { collection_id } = ctx.params;
     if (!collection_id) {
       response(ctx, 400, "Collection Id is required");
@@ -73,8 +73,8 @@ class CollectionController {
       const { validatedData, error, message } =
         collectionUpdateValidation(jsonBody);
 
-      if (error) {
-        response(ctx, 400, message);
+      if (error || !validatedData) {
+        response(ctx, 400, "", message);
         return;
       }
       const { data, error: err } = await CollectionService.update({
@@ -98,16 +98,16 @@ class CollectionController {
       const jsonBody = await body.json();
       const { validatedData, error, message } =
         collectionDeleteValidation(jsonBody);
-      if (error) {
-        response(ctx, 400, message);
+      if (error || !validatedData) {
+        response(ctx, 400, "", message);
         return;
       }
       const { data, error: err } = await CollectionService.delete({
         ...validatedData,
         userId: ctx.state.user.id,
       });
-      if (error) {
-        response(ctx, 400, error);
+      if (err) {
+        response(ctx, 400, err);
         return;
       }
       response(ctx, 200, "Collection deleted successfully!", data);

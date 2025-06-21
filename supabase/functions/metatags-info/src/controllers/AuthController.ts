@@ -16,8 +16,8 @@ class AuthController {
       password,
     });
 
-    if (error) {
-      response(ctx, 400, message);
+    if (error || !validatedData) {
+      response(ctx, 400, "", message);
       return;
     }
     try {
@@ -46,8 +46,8 @@ class AuthController {
       password,
     });
 
-    if (error) {
-      response(ctx, 400, message);
+    if (error || !validatedData) {
+      response(ctx, 400, "", message);
       return;
     }
     try {
@@ -68,7 +68,7 @@ class AuthController {
     }
   }
 
-  public static async getUser(ctx: Context) {
+  public static getUser(ctx: Context) {
     response(ctx, 200, "Get user successful!", ctx.state.user);
   }
 

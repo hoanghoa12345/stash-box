@@ -1,4 +1,4 @@
-import { Context } from "../config/deps.ts";
+import { Context, RouterContext } from "../config/deps.ts";
 import { PostUpdate } from "../models/Post.ts";
 import PostService from "../services/PostService.ts";
 import { log } from "../utils/logger.ts";
@@ -39,7 +39,7 @@ class PostController {
     response(ctx, 200, "Posts retrieved successfully!", result);
   }
 
-  public static async show(ctx: Context) {
+  public static async show(ctx: RouterContext<string>) {
     const { post_id } = ctx.params;
     if (!post_id) {
       response(ctx, 400, "Post Id is required");
@@ -88,7 +88,7 @@ class PostController {
     }
   }
 
-  public static async update(ctx: Context) {
+  public static async update(ctx: RouterContext<string>) {
     const body = ctx.request.body;
     try {
       const jsonBody = await body.json();
@@ -114,7 +114,7 @@ class PostController {
         collection_id: collectionId || null,
         image_url: imageUrl || null,
         link: link || null,
-        type
+        type,
       };
       const result = await PostService.update(post_id, updateData);
 
@@ -130,7 +130,7 @@ class PostController {
     }
   }
 
-  public static async destroy(ctx: Context) {
+  public static async destroy(ctx: RouterContext<string>) {
     const { post_id } = ctx.params;
     if (!post_id) {
       response(ctx, 400, "Post Id is required");
