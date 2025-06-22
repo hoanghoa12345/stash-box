@@ -46,7 +46,7 @@ const AppHeader = ({ selectedCollection }: AppHeaderProps) => {
   }
 
   return (
-    <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 sticky top-0 z-50 -mb-4 px-4 pb-4 bg-background">
+    <header className="flex h-16 shrink-0 items-center gap-2 border-b sticky top-0 z-50 -mb-4 px-4 bg-background">
       <SidebarTrigger className="-ml-1" />
       <div className="flex items-center gap-2">
         <div className={`flex size-8 items-center justify-center rounded`}>

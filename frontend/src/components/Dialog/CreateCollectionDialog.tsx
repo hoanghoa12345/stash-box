@@ -5,22 +5,23 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Button } from "../ui/button"
-import { useEffect, useState } from "react"
-import { ICollection, UpsetCollection } from "@/types"
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '../ui/button';
+import { useEffect, useState } from 'react';
+import { ICollection, UpsetCollection } from '@/types';
+import IconPicker from '../Picker/IconPicker';
 
 type CreateCollectionDialogProps = {
-  isOpen: boolean
-  setIsOpen: (open: boolean) => void
-  onSubmit: ({ name, icon, collectionId }: UpsetCollection) => void
-  initialData?: ICollection | null
-  children?: React.ReactNode
-  asChild?: boolean
-}
+  isOpen: boolean;
+  setIsOpen: (open: boolean) => void;
+  onSubmit: ({ name, icon, collectionId }: UpsetCollection) => void;
+  initialData?: ICollection | null;
+  children?: React.ReactNode;
+  asChild?: boolean;
+};
 
 const CreateCollectionDialog = ({
   isOpen,
@@ -28,23 +29,21 @@ const CreateCollectionDialog = ({
   onSubmit,
   initialData,
   children,
-  asChild
+  asChild,
 }: CreateCollectionDialogProps) => {
-  const [newCollectionName, setNewCollectionName] = useState("")
-  const [newCollectionEmoji, setNewCollectionEmoji] = useState("📁")
+  const [newCollectionName, setNewCollectionName] = useState('');
+  const [newCollectionEmoji, setNewCollectionEmoji] = useState('📁');
   useEffect(() => {
-    setNewCollectionName(initialData?.name || "")
-    setNewCollectionEmoji(initialData?.icon || "📁")
-  }, [initialData])
+    setNewCollectionName(initialData?.name || '');
+    setNewCollectionEmoji(initialData?.icon || '📁');
+  }, [initialData]);
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild={asChild}>
-        {children}
-      </DialogTrigger>
+      <DialogTrigger asChild={asChild}>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>
-            {initialData ? "Edit Collection" : "Create New Collection"}
+            {initialData ? 'Edit Collection' : 'Create New Collection'}
           </DialogTitle>
           <DialogDescription>
             Add a new collection to organize your resources. Choose a name and
@@ -69,29 +68,17 @@ const CreateCollectionDialog = ({
               Icon
             </Label>
             <div className="col-span-3 flex items-center gap-2">
-              <Input
-                id="emoji"
-                value={newCollectionEmoji}
-                onChange={(e) => setNewCollectionEmoji(e.target.value)}
-                placeholder="📁"
-                className="w-16 text-center text-lg"
-                maxLength={2}
-              />
-              <div className="flex gap-1 overflow-x-auto">
-                {["📁", "📚", "🎨", "⚙️", "🎬", "📄", "💼", "🔗"].map(
-                  (emoji) => (
-                    <Button
-                      key={emoji}
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 w-8 px-2 py-0 text-lg"
-                      onClick={() => setNewCollectionEmoji(emoji)}
-                    >
-                      {emoji}
-                    </Button>
-                  )
-                )}
-              </div>
+              <IconPicker onChange={setNewCollectionEmoji} asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 px-2 py-0 text-lg"
+                >
+                  <span role="img" aria-label="emoji">
+                    {newCollectionEmoji}
+                  </span>
+                </Button>
+              </IconPicker>
             </div>
           </div>
         </div>
@@ -110,18 +97,18 @@ const CreateCollectionDialog = ({
                 onSubmit({
                   name: newCollectionName,
                   icon: newCollectionEmoji,
-                  collectionId: initialData?.id
+                  collectionId: initialData?.id,
                 })
               }
               disabled={!newCollectionName.trim()}
             >
-              {initialData ? "Update Collection" : "Create Collection"}
+              {initialData ? 'Update Collection' : 'Create Collection'}
             </Button>
           </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
-}
+  );
+};
 
-export default CreateCollectionDialog
+export default CreateCollectionDialog;

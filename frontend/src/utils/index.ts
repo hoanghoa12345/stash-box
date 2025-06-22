@@ -16,9 +16,3 @@ export const handleError = (toast: ToastInstance, err: Error) => {
 
   toast.error(errorMessage)
 }
-
-export const baseName = import.meta.env.VITE_BASE_URL || ""
-
-export const getImageUrl = (path: string) => {
-  return `${baseName}${path}`
-}

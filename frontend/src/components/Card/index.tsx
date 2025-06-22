@@ -14,8 +14,8 @@ import { Button } from '../ui/button';
 import { MoreOptionMenu } from './menu';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
-import { getImageUrl } from '@/utils';
 import { cn } from '@/lib/utils';
+import placeholderImage from '@/assets/images/placeholder.webp';
 
 export enum PostType {
   POST_TYPE_TEXT = 1,
@@ -42,13 +42,6 @@ const LinkCard = forwardRef<HTMLDivElement, LinkCardProps>(
       }
     };
 
-    const handleImageError = (
-      e: React.SyntheticEvent<HTMLImageElement, Event>,
-    ) => {
-      e.currentTarget.onerror = null;
-      e.currentTarget.src = getImageUrl('images/placeholder.webp');
-    };
-
     const handleEditPost = () => {
       let editUrl = `/post/${card.id}/edit`;
       if (card.collection_id) {
@@ -67,17 +60,15 @@ const LinkCard = forwardRef<HTMLDivElement, LinkCardProps>(
           )}
           ref={ref}
         >
-          {card.type === PostType.POST_TYPE_LINK && card.image_url && (
+          {card.type === PostType.POST_TYPE_LINK && (
             <div className="aspect-video overflow-hidden">
               <img
-                src={card.image_url}
+                src={card.image_url ? card.image_url : placeholderImage}
                 alt={card.title}
                 className="size-full object-cover group-hover:scale-105 transition-transform duration-200"
-                onError={handleImageError}
               />
             </div>
           )}
-
           <CardHeader
             className={cn(
               card.type === PostType.POST_TYPE_LINK ? 'pb-2' : 'pb-3',
