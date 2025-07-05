@@ -32,7 +32,7 @@ const OAuthCallback: React.FC = () => {
         Cookies.set('user_data', JSON.stringify(data.data.user), { expires: 7 });
 
         // Redirect to main app
-        window.location.href = '/';
+        window.location.href = import.meta.env.VITE_BASE_URL;
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Authentication failed');
         setIsProcessing(false);
