@@ -11,11 +11,14 @@ const router = new Router({
   prefix: `/${FUNCTION_NAME}`,
 });
 
-router.get("/meta", MetaTagController.get_info);
+router.get("/meta", MetaTagController.getInfo);
+router.get("/app", MetaTagController.getAppInfo);
 
-router.post("/__sign_up_user", AuthController.signUp);
+router.get("/oauth", AuthController.oauth);
+router.get("/callback", AuthController.callback);
 router.post("/sign-in", AuthController.signIn);
 router.get("/user", auth, AuthController.getUser);
+router.get("/profile", auth, AuthController.getProfile);
 router.post("/sign-out", auth, AuthController.signOut);
 router.post("/refresh-token", AuthController.refreshToken);
 

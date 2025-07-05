@@ -1,15 +1,17 @@
-import { createClient, SupabaseClient } from "../config/deps.ts";
+import { createClient, Pool, SupabaseClient } from "../config/deps.ts";
 import { DOMParser, Element } from "../config/deps.ts";
 import { uuid } from "../utils/helpers.ts";
-import { log, logErr } from "../utils/logger.ts";
+import { logErr } from "../utils/logger.ts";
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
 const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
+const databaseUrl = Deno.env.get("SUPABASE_DB_URL") ?? "";
 
 class MetaTagService {
+  private static pool = new Pool(databaseUrl, 3, true);
   private static supabaseClient: SupabaseClient = createClient(
     supabaseUrl,
-    supabaseKey,
+    supabaseKey
   );
 
   private static imageBucket: string = "posts-media";
@@ -19,7 +21,7 @@ class MetaTagService {
     headers.set("accept", "text/html,application/xhtml+xml,application/xml");
     headers.set(
       "user-agent",
-      "Mozilla / 5.0 (Windows NT 10.0; Win64; x64) AppleWebKit / 537.36 (KHTML, like Gecko) Chrome / 89.0.142.86 Safari / 537.36",
+      "Mozilla / 5.0 (Windows NT 10.0; Win64; x64) AppleWebKit / 537.36 (KHTML, like Gecko) Chrome / 89.0.142.86 Safari / 537.36"
     );
     const res = await fetch(url, { headers });
     const html = await res.text();
@@ -37,7 +39,7 @@ class MetaTagService {
 
         return acc;
       },
-      {} as Record<string, string>,
+      {} as Record<string, string>
     );
     documentMeta.title ??= document.querySelector("title")?.textContent || "";
 
@@ -47,13 +49,13 @@ class MetaTagService {
   public static async uploadImageToBucket(
     imageUrl: string,
     userId: string,
-    imageName?: string,
+    imageName?: string
   ) {
     if (!imageUrl) return null;
     const headers = new Headers();
     headers.set(
       "user-agent",
-      "Mozilla / 5.0 (Windows NT 10.0; Win64; x64) AppleWebKit / 537.36 (KHTML, like Gecko) Chrome / 89.0.142.86 Safari / 537.36",
+      "Mozilla / 5.0 (Windows NT 10.0; Win64; x64) AppleWebKit / 537.36 (KHTML, like Gecko) Chrome / 89.0.142.86 Safari / 537.36"
     );
     const fileUuid = uuid();
     const response = await fetch(imageUrl);
@@ -66,7 +68,7 @@ class MetaTagService {
         {
           cacheControl: "3600",
           upsert: true,
-        },
+        }
       );
     if (error) {
       logErr(error);
@@ -77,11 +79,24 @@ class MetaTagService {
 
   public static async getPublicUrl(imagePath: string | null) {
     if (!imagePath) return null;
-    const { data } = await this.supabaseClient
-      .storage
+    const { data } = await this.supabaseClient.storage
       .from(this.imageBucket)
       .getPublicUrl(imagePath);
     return data.publicUrl;
+  }
+
+  public static async getAppInfo() {
+    const collection = await this.pool.connect();
+    const query = `SELECT key, value FROM sb_app_config WHERE is_public = true;`;
+    const result = await collection.queryObject<{ key: string; value: string }>(
+      query
+    );
+    collection.release();
+    const config = result.rows.reduce((acc, row) => {
+      acc[row.key] = row.value;
+      return acc;
+    }, {} as Record<string, unknown>);
+    return config;
   }
 }
 

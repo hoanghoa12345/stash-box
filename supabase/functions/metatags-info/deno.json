@@ -1,0 +1,13 @@
+{
+  "name": "metatags-info",
+  "version": "1.0.0",
+  "license": "MIT",
+  "tasks": {
+    "start": "deno run --allow-all --env=../.env.local index.ts",
+    "dev": "deno run --allow-all --env=../.env.local --watch --unstable index.ts"
+  },
+  "imports": { "@zaubrik/djwt": "jsr:@zaubrik/djwt@^3.0.2" },
+  "lint": {
+    "files": ["index.ts", "src/**/*.ts"]
+  }
+}
