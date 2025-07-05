@@ -2,6 +2,7 @@ import MainLayout from "@/layouts/MainLayout"
 import Collection from "@/pages/Collection"
 import Login from "@/pages/Login"
 import NotFoundPage from "@/pages/NotFound"
+import OAuthCallback from "@/pages/OAuthCallback"
 import PostDetail from "@/pages/Post"
 import Settings from "@/pages/Settings"
 import { createBrowserRouter } from "react-router-dom"
@@ -37,6 +38,10 @@ const router = createBrowserRouter(
     {
       path: "/login",
       element: <Login />
+    },
+    {
+      path: "/oauth/callback",
+      element: <OAuthCallback />
     },
     {
       path: "*",

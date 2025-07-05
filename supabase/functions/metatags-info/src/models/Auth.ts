@@ -1,4 +1,5 @@
 export interface IOAuthConfig {
+  provider: string;
   client_id: string;
   redirect_uri: string;
   client_secret: string;
@@ -20,4 +21,21 @@ export interface IOAuthState {
   user_id?: string;
   timestamp: bigint;
   expires_at: Date;
+}
+
+export interface IOAuthIdentity {
+  oauth_user_id: string;
+  provider: string;
+  auth_user_id?: string;
+}
+
+export interface IOAuthUser {
+  id: string;
+  email: string;
+  name: string;
+}
+
+export interface JWTPayload {
+  user: IOAuthUser;
+  exp: number;
 }

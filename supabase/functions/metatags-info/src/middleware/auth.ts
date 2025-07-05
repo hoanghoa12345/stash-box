@@ -22,6 +22,6 @@ export async function auth(ctx: Context, next: () => Promise<unknown>) {
     return;
   }
 
-  ctx.state.user = payload;
+  ctx.state.user = payload.user;
   await next();
 }

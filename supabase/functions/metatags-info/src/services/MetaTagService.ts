@@ -6,6 +6,7 @@ import { logErr } from "../utils/logger.ts";
 const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
 const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
 const databaseUrl = Deno.env.get("SUPABASE_DB_URL") ?? "";
+const environment = Deno.env.get("ENVIRONMENT") || "production";
 
 class MetaTagService {
   private static pool = new Pool(databaseUrl, 3, true);
@@ -87,9 +88,11 @@ class MetaTagService {
 
   public static async getAppInfo() {
     const collection = await this.pool.connect();
-    const query = `SELECT key, value FROM sb_app_config WHERE is_public = true;`;
+    const query = `SELECT key, value FROM sb_app_config WHERE is_public = true AND environment = $1;`;
+    const params = [environment];
     const result = await collection.queryObject<{ key: string; value: string }>(
-      query
+      query,
+      params
     );
     collection.release();
     const config = result.rows.reduce((acc, row) => {

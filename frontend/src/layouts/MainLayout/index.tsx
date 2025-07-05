@@ -3,7 +3,7 @@ import { Navigate, Outlet } from "react-router-dom"
 import logo from "@/assets/logo.svg"
 
 const MainLayout = () => {
-  const { isLoading, isAuthenticated } = useAuth()
+  const { user, token, isLoading } = useAuth()
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -13,7 +13,7 @@ const MainLayout = () => {
       </div>
     )
   }
-  if (!isLoading && !isAuthenticated) {
+  if (!user && !token) {
     return <Navigate to="/login" />
   }
   return <Outlet />

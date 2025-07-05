@@ -1,10 +1,16 @@
 import { createClient, Pool, SupabaseClient } from "../config/deps.ts";
-import { IOAuthConfig, IOAuthState, IUserToken } from "../models/Auth.ts";
+import {
+  IOAuthConfig,
+  IOAuthIdentity,
+  IOAuthState,
+  IUserToken,
+} from "../models/Auth.ts";
 import Database from "../utils/database.ts";
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
 const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
 const databaseUrl = Deno.env.get("SUPABASE_DB_URL") ?? "";
+const environment = Deno.env.get("ENVIRONMENT") || "production";
 
 class AuthService {
   private static supabaseClient: SupabaseClient = createClient(
@@ -17,11 +23,12 @@ class AuthService {
 
   public static async getOAuthConfig() {
     const connection = await this.pool.connect();
-    const query = `SELECT key, value FROM sb_app_config WHERE key='oauth_config';`;
+    const query = `SELECT key, value FROM sb_app_config WHERE key=$1 AND environment = $2 LIMIT 1;`;
+    const params = ["oauth_config", environment];
     const result = await connection.queryObject<{
       key: string;
       value: IOAuthConfig;
-    }>(query);
+    }>(query, params);
     connection.release();
     return result.rows;
   }
@@ -97,6 +104,22 @@ class AuthService {
   static async cleanupExpiredStates() {
     const query = `DELETE FROM oauth_states WHERE expires_at < NOW()`;
     await this.db.query(query);
+  }
+
+  static async storeOAuthIdentity(oauthUserId: string, provider: string) {
+    const query = `
+    INSERT INTO oauth_identities (provider_name, provider_user_id)
+    VALUES ($1, $2)`;
+    await this.db.query(query, [provider, oauthUserId]);
+  }
+
+  static async getOAuthIdentity(oauthUserId: string) {
+    const query = `
+    SELECT provider_name, provider_user_id, auth_user_id
+    FROM oauth_identities
+    WHERE provider_user_id = $1`;
+    const result = await this.db.query<IOAuthIdentity>(query, [oauthUserId]);
+    return result.rows[0] || null;
   }
 
   public static getUser(token: string) {

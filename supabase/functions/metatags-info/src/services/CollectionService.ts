@@ -17,6 +17,7 @@ class CollectionService {
     offset: number = -1,
     limit: number = 50
   ) {
+    log(`Fetching all collections for user ${userId}`);
     const connection = await this.pool.connect();
     let query = `SELECT c.id, c.name, c.parent_id, c.icon, c.updated_at, COUNT(p.id) AS total_posts 
         FROM sb_collections c LEFT JOIN sb_posts p ON c.id=p.collection_id 

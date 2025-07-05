@@ -1,4 +1,5 @@
 import { create, verify } from "@zaubrik/djwt";
+import { JWTPayload } from "../models/Auth.ts";
 
 const JWT_SECRET = Deno.env.get("JWT_SECRET") || "jwt-secret-key";
 
@@ -53,7 +54,7 @@ export async function createJWT(
   return await create({ alg: "HS256", typ: "JWT" }, payload, key);
 }
 
-export async function verifyJWT(token: string): Promise<unknown> {
+export async function verifyJWT(token: string): Promise<JWTPayload | null> {
   try {
     return await verify(token, key);
   } catch {

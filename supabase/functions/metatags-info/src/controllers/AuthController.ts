@@ -101,11 +101,26 @@ class AuthController {
         tokenData.scope
       );
 
+      const userIdentifier = await AuthService.getOAuthIdentity(userData.sub);
+      if (!userIdentifier) {
+        await AuthService.storeOAuthIdentity(userData.sub, authConfig.provider);
+      }
+      if (!userIdentifier.auth_user_id) {
+        response(
+          ctx,
+          400,
+          "Authorized user id not set. Please contact the admin."
+        );
+        return;
+      }
+
       // Create JWT for our application
       const jwtPayload = {
-        userId: userData.sub,
-        email: userData.email,
-        name: userData.name,
+        user: {
+          id: userIdentifier.auth_user_id,
+          email: userData.email,
+          name: userData.name,
+        },
         exp: Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60, // 7 days
       };
 
@@ -115,7 +130,7 @@ class AuthController {
         token: jwt,
         refreshToken: tokenData.refresh_token,
         user: {
-          id: userData.id,
+          id: userIdentifier.auth_user_id,
           email: userData.email,
           name: userData.name,
           picture: userData.picture,
@@ -166,7 +181,15 @@ class AuthController {
 
   public static async getProfile(ctx: Context) {
     const user = ctx.state.user;
-    const tokens = await AuthService.getUserTokens(user.userId.toString());
+    const userIdentifier = await AuthService.getOAuthIdentity(user.id);
+
+    if (!userIdentifier) {
+      response(ctx, 401, "User not found");
+      return;
+    }
+    const tokens = await AuthService.getUserTokens(
+      userIdentifier.oauth_user_id
+    );
 
     if (!tokens) {
       response(ctx, 401, "User tokens not found");
@@ -245,7 +268,13 @@ class AuthController {
 
   public static async signOut(ctx: Context) {
     const user = ctx.state.user;
-    const userId = user.userId.toString();
+    const userIdentifier = await AuthService.getOAuthIdentity(user.id);
+
+    if (!userIdentifier) {
+      response(ctx, 401, "User not found");
+      return;
+    }
+    const userId = userIdentifier.oauth_user_id;
 
     try {
       // Get user's stored tokens

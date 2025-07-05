@@ -39,11 +39,10 @@ CREATE TABLE sb_app_config (
     value JSONB NOT NULL,
     description TEXT,
     is_public BOOLEAN NOT NULL DEFAULT false,
+    environment TEXT NOT NULL DEFAULT 'production',
     updated_at TIMESTAMPTZ DEFAULT NOW(),
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
-
-CREATE UNIQUE INDEX idx_sb_app_config_key ON sb_app_config(key);
 
 -- Create OAuth states table
 CREATE TABLE oauth_states (
@@ -103,3 +102,12 @@ BEGIN
     RETURN deleted_count;
 END;
 $$ LANGUAGE plpgsql;
+
+CREATE TABLE oauth_identities (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    provider_name VARCHAR(50) NOT NULL,
+    provider_user_id VARCHAR(255) NOT NULL,
+    auth_user_id UUID NOT REFERENCES "auth"."users"("id") ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(provider_user_id)
+);

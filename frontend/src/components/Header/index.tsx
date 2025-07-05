@@ -71,10 +71,10 @@ const AppHeader = ({ selectedCollection }: AppHeaderProps) => {
           Recent
         </Button> */}
         <UserMenu
-          userName={user?.data.email?.split("@")[0]}
-          userEmail={user?.data.email}
+          userName={user.name}
+          userEmail={user.email}
           onLogout={handleLogout}
-          // userProfilePicture={user?.profilePicture}
+          userProfilePicture={user?.picture}
         />
       </div>
     </header>
