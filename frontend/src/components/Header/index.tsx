@@ -71,8 +71,8 @@ const AppHeader = ({ selectedCollection }: AppHeaderProps) => {
           Recent
         </Button> */}
         <UserMenu
-          userName={user.name}
-          userEmail={user.email}
+          userName={user?.name}
+          userEmail={user?.email}
           onLogout={handleLogout}
           userProfilePicture={user?.picture}
         />

@@ -25,6 +25,7 @@ export interface User {
   created_at: string;
   updated_at: string;
   is_anonymous: boolean;
+  picture?: string;
 }
 
 export interface Session {
