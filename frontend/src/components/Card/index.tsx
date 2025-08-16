@@ -15,7 +15,7 @@ import { MoreOptionMenu } from './menu';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import placeholderImage from '@/assets/images/placeholder.webp';
+import placeholderImage from '@/assets/images/document-folders.svg';
 
 export enum PostType {
   POST_TYPE_TEXT = 1,

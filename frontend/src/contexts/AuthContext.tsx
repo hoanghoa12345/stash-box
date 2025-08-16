@@ -2,7 +2,7 @@ import { AuthContextType, User } from '@/types';
 import React, { createContext, useEffect, useState } from 'react';
 import Cookies from 'js-cookie';
 import axiosClient from '@/services/axiosClient';
-import { toast } from "sonner"
+import { toast } from 'sonner';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -52,7 +52,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const logout = async () => {
     if (token) {
       try {
-        await axiosClient.post('/sign-out')
+        await axiosClient.post('/sign-out');
       } catch (error) {
         console.error('Server sign out failed:', error);
       }

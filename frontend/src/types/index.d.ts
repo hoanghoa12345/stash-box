@@ -126,3 +126,7 @@ interface AuthContextType {
   logout: () => void;
   isLoading: boolean;
 }
+
+interface AppInfo {
+  app_name: string;
+}

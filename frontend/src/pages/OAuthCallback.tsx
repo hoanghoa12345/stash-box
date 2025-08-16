@@ -2,10 +2,13 @@ import axiosClient from '@/services/axiosClient';
 import { RefreshCw, Shield } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import Cookies from 'js-cookie';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 const OAuthCallback: React.FC = () => {
   const [isProcessing, setIsProcessing] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleCallback = async () => {
@@ -44,32 +47,32 @@ const OAuthCallback: React.FC = () => {
 
   if (isProcessing) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-background flex items-center justify-center">
         <div className="text-center">
-          <RefreshCw className="mx-auto h-8 w-8 animate-spin text-blue-600" />
-          <p className="mt-2 text-gray-600">Completing authentication...</p>
+          <RefreshCw className="mx-auto h-8 w-8 animate-spin text-blue-600 dark:text-blue-400" />
+          <p className="mt-2 text-gray-600 dark:text-gray-400">Completing authentication...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full">
+    <div className="min-h-screen bg-gray-50 dark:bg-background flex items-center justify-center">
+      <div className="bg-white dark:bg-muted p-8 rounded-lg shadow-md max-w-md w-full">
         <div className="text-center">
-          <div className="mx-auto h-12 w-12 bg-red-100 rounded-full flex items-center justify-center">
-            <Shield className="h-6 w-6 text-red-600" />
+          <div className="mx-auto h-12 w-12 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center">
+            <Shield className="h-6 w-6 text-red-600 dark:text-red-300" />
           </div>
-          <h2 className="mt-4 text-xl font-semibold text-gray-900">
+          <h2 className="mt-4 text-xl font-semibold text-gray-900 dark:text-gray-100">
             Authentication Error
           </h2>
-          <p className="mt-2 text-gray-600">{error}</p>
-          <button
-            onClick={() => (window.location.href = '/')}
-            className="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          <p className="mt-2 text-gray-600 dark:text-gray-400">{error}</p>
+          <Button
+            onClick={() => navigate('/')}
+            className="mt-4"
           >
             Return to App
-          </button>
+          </Button>
         </div>
       </div>
     </div>

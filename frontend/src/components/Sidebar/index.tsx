@@ -149,17 +149,31 @@ const AppSidebar = () => {
   if (isLoading) {
     return (
       <Sidebar>
-        <SidebarHeader>
+        <SidebarHeader className="bg-background">
           <div className="flex items-center gap-2 px-4 py-2">
             <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
               <Folder className="size-4" />
             </div>
-            <div className="flex flex-col">
+            <div className="flex flex-col gap-1">
               <Skeleton className="h-4 w-20" />
               <Skeleton className="h-2 w-24" />
             </div>
           </div>
         </SidebarHeader>
+        <SidebarContent className="bg-background">
+          <SidebarGroup>
+            <div className="flex items-center justify-between">
+              <SidebarGroupLabel>
+                <Skeleton className="h-4 w-20" />
+              </SidebarGroupLabel>
+            </div>
+            <div className="mt-4 flex flex-col gap-2">
+              <Skeleton className="h-4 w-40" />
+              <Skeleton className="h-4 w-60" />
+              <Skeleton className="h-4 w-20" />
+            </div>
+          </SidebarGroup>
+        </SidebarContent>
       </Sidebar>
     );
   }

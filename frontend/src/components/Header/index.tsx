@@ -1,6 +1,6 @@
 import { SidebarTrigger } from "../ui/sidebar"
 import { Button } from "../ui/button"
-import { CirclePlus } from "lucide-react"
+import { Plus } from "lucide-react"
 import { ICollection } from "@/types"
 import UserMenu from "./user"
 import { AuthService } from "@/services/AuthService"
@@ -62,9 +62,9 @@ const AppHeader = ({ selectedCollection }: AppHeaderProps) => {
         </div>
       </div>
       <div className="ml-auto flex items-center gap-2">
-        <Button variant="outline" size="sm" onClick={navigateToCreatePost}>
-          <CirclePlus className="size-4 mr-2" />
-          Create
+        <Button variant="outline" size="default" onClick={navigateToCreatePost}>
+          <Plus className="!size-5" />
+          <span className="text-base">New</span>
         </Button>
         {/* <Button variant="outline" size="sm">
           <Calendar className="size-4 mr-2" />
