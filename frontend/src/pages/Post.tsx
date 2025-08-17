@@ -1,4 +1,9 @@
 import type React from 'react';
+import { useEffect, useState } from 'react';
+import { ArrowLeft, Save, X, Eye, Clock, Loader2 } from 'lucide-react';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,16 +11,10 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Save, X, Eye, Clock, Loader2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { PostService } from '@/services/PostService';
 import { ICollection, PostCreateData } from '@/types';
 import { CollectionService } from '@/services/CollectionService';
-import { toast } from 'sonner';
 import { handleError } from '@/utils';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import placeholderImage from '@/assets/images/document-folders.svg';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const unCategorizedCollection: ICollection = {
@@ -35,9 +34,6 @@ export default function PostDetail() {
   const [isDirty, setIsDirty] = useState(false);
   const [selectedCollection, setSelectedCollection] =
     useState<ICollection | null>(null);
-  const [selectedCollectionId, setSelectedCollectionId] = useState<
-    string | null
-  >(null);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const queryClient = useQueryClient();
@@ -104,14 +100,6 @@ export default function PostDetail() {
       handleError(toast, error);
     },
   });
-
-  const getCollections = async () => {
-    const response = await CollectionService.getCollections({
-      offset: -1,
-      limit: 50,
-    });
-    return response.data;
-  };
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTitle(e.target.value);
@@ -194,8 +182,8 @@ export default function PostDetail() {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-4">
               <Button variant="ghost" size="sm" onClick={handleCancel}>
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back
+                <ArrowLeft className="!size-6 mr-2" />
+               <span className='hidden md:inline'>Back</span>
               </Button>
               <div className="flex flex-col">
                 <h1 className="text-lg font-semibold">
@@ -245,7 +233,7 @@ export default function PostDetail() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-4xl mx-auto sm:px-6 lg:px-8 sm:py-8">
         {isPostLoading ? (
           <div className="flex flex-col space-y-3">
             <Skeleton className="h-6 w-20" />
@@ -261,11 +249,11 @@ export default function PostDetail() {
             </div>
           </div>
         ) : (
-          <Card>
+          <Card className='border-none shadow-none sm:border sm:shadow'>
             <CardHeader>
               <CardTitle>Post Details</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-4">
               {/* Title Field */}
               <div className="space-y-2">
                 <Label htmlFor="title" className="text-base font-medium">
@@ -279,13 +267,10 @@ export default function PostDetail() {
                   onChange={handleTitleChange}
                   className="text-lg"
                 />
-                <p className="text-sm text-muted-foreground">
-                  Choose a clear and descriptive title for your post
-                </p>
               </div>
 
               {/* Additional Options */}
-              <div className="border-t pt-6">
+              <div className="border-t pt-3">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="category" className="text-sm font-medium">
@@ -293,7 +278,7 @@ export default function PostDetail() {
                     </Label>
                     <select
                       id="category"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-transparent"
                       onChange={(e) => {
                         setSelectedCollection(
                           collections?.data.find(
@@ -315,69 +300,38 @@ export default function PostDetail() {
                         </option>
                       ))}
                     </select>
-                    {/* <AsyncSelect<ICollection>
-                    fetcher={getCollections}
-                    renderOption={(collection) => (
-                      <div className="flex items-center gap-2">
-                        <div className="text-base">{collection.icon}</div>
-                        <div className="flex flex-col">
-                          <div className="font-medium">{collection.name}</div>
-                          <div className="text-xs text-muted-foreground">
-                            {collection.total_posts}
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                    getOptionValue={(collection) => collection.id || ''}
-                    getDisplayValue={(collection) => (
-                      <div className="flex items-center gap-2 text-left">
-                        <div className="text-base">{collection.icon}</div>
-                        <div className="flex flex-col leading-tight">
-                          <div className="font-medium">{collection.name}</div>
-                          <div className="text-xxs text-muted-foreground">
-                            {collection.total_posts}
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                    notFound={
-                      <div className="py-6 text-center text-sm">
-                        No collection found
-                      </div>
-                    }
-                    label="Collection"
-                    placeholder="Search collection..."
-                    value={selectedCollectionId || ''}
-                    onChange={setSelectedCollectionId}
-                    width="375px"
-                  /> */}
                   </div>
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="link" className="text-base font-medium">
-                  Link
-                </Label>
-                <Input
-                  id="link"
-                  type="url"
-                  placeholder="https://example.com"
-                  value={post?.data.link || ''}
-                />
-              </div>
+              {/* Link Field */}
+              {post?.data.link && (
+                <div className="space-y-2">
+                  <Label htmlFor="link" className="text-base font-medium">
+                    Link
+                  </Label>
+                  <Input
+                    id="link"
+                    type="url"
+                    value={post?.data.link || ''}
+                    readOnly
+                  />
+                </div>
+              )}
 
               {/* Image Field */}
-              <div className="space-y-2">
-                <Label htmlFor="image" className="text-base font-medium">
-                  Image
-                </Label>
-                <img
-                  className="w-full max-h-96 object-contain"
-                  src={post?.data.image_url || placeholderImage}
-                  alt=""
-                />
-              </div>
+              {post?.data.image_url && (
+                <div className="space-y-2">
+                  <Label htmlFor="image" className="text-base font-medium">
+                    Image
+                  </Label>
+                  <img
+                    className="w-full max-h-96 object-contain"
+                    src={post.data.image_url}
+                    alt="post image"
+                  />
+                </div>
+              )}
 
               {/* Content Field */}
               <div className="space-y-2">
@@ -389,7 +343,7 @@ export default function PostDetail() {
                   placeholder="Write your post content here..."
                   value={content}
                   onChange={handleContentChange}
-                  className="min-h-[400px] resize-none"
+                  className="min-h-[350px] resize-none"
                 />
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
                   <p>Write your post content using markdown formatting</p>
@@ -404,10 +358,11 @@ export default function PostDetail() {
         )}
 
         {/* Action Buttons (Mobile) */}
-        <div className="mt-6 flex flex-col sm:flex-row gap-3 sm:hidden">
+        <div className="mt-6 flex flex-col sm:flex-row gap-3 sm:hidden px-2">
           <Button
             onClick={handleSave}
             disabled={!content.trim()}
+            size={'lg'}
             className="w-full"
           >
             {mutation.isPending ? (
@@ -418,13 +373,13 @@ export default function PostDetail() {
             ) : (
               <>
                 <Save className="h-4 w-4 mr-2" />
-                Save Post
+                <span className='text-base sm:text-sm'>Save Post</span>
               </>
             )}
           </Button>
-          <Button variant="outline" onClick={handleCancel} className="w-full">
+          <Button variant="outline" onClick={handleCancel} className="w-full" size={'lg'}>
             <X className="h-4 w-4 mr-2" />
-            Cancel
+            <span className='text-base sm:text-sm'>Cancel</span>
           </Button>
         </div>
       </main>

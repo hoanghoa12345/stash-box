@@ -1,155 +1,69 @@
-import { Button } from "@/components/ui/button"
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle
-} from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, Palette, Type, Monitor, Check } from "lucide-react"
-import { useState } from "react"
-import { ModeToggle } from "@/components/Button/mode-toggle"
-import { useNavigate } from "react-router-dom"
-
-const themeOptions = [
-  {
-    id: "blue",
-    name: "Ocean Blue",
-    description: "Cool and professional",
-    primary: "bg-blue-500",
-    secondary: "bg-blue-100",
-    accent: "bg-blue-600"
-  },
-  {
-    id: "green",
-    name: "Forest Green",
-    description: "Natural and calming",
-    primary: "bg-green-500",
-    secondary: "bg-green-100",
-    accent: "bg-green-600"
-  },
-  {
-    id: "purple",
-    name: "Royal Purple",
-    description: "Creative and modern",
-    primary: "bg-purple-500",
-    secondary: "bg-purple-100",
-    accent: "bg-purple-600"
-  },
-  {
-    id: "orange",
-    name: "Sunset Orange",
-    description: "Warm and energetic",
-    primary: "bg-orange-500",
-    secondary: "bg-orange-100",
-    accent: "bg-orange-600"
-  },
-  {
-    id: "pink",
-    name: "Rose Pink",
-    description: "Soft and elegant",
-    primary: "bg-pink-500",
-    secondary: "bg-pink-100",
-    accent: "bg-pink-600"
-  },
-  {
-    id: "teal",
-    name: "Ocean Teal",
-    description: "Fresh and vibrant",
-    primary: "bg-teal-500",
-    secondary: "bg-teal-100",
-    accent: "bg-teal-600"
-  }
-]
-
-const fontOptions = [
-  {
-    id: "inter",
-    name: "Inter",
-    description: "Modern and readable",
-    className: "font-sans",
-    preview: "The quick brown fox jumps over the lazy dog"
-  },
-  {
-    id: "roboto",
-    name: "Roboto",
-    description: "Clean and friendly",
-    className: "font-sans",
-    preview: "The quick brown fox jumps over the lazy dog"
-  },
-  {
-    id: "poppins",
-    name: "Poppins",
-    description: "Geometric and modern",
-    className: "font-sans",
-    preview: "The quick brown fox jumps over the lazy dog"
-  },
-  {
-    id: "source-serif",
-    name: "Source Serif Pro",
-    description: "Traditional and elegant",
-    className: "font-serif",
-    preview: "The quick brown fox jumps over the lazy dog"
-  },
-  {
-    id: "playfair",
-    name: "Playfair Display",
-    description: "Stylish and distinctive",
-    className: "font-serif",
-    preview: "The quick brown fox jumps over the lazy dog"
-  },
-  {
-    id: "jetbrains",
-    name: "JetBrains Mono",
-    description: "Perfect for code",
-    className: "font-mono",
-    preview: "The quick brown fox jumps over the lazy dog"
-  }
-]
+  CardTitle,
+} from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { ArrowLeft, Palette, Type, Monitor, Check } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { ModeToggle } from '@/components/Button/mode-toggle';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
+import { useTheme } from '@/components/provider/theme-provider';
+import { fontOptions, themeOptions } from '@/utils';
 
 export default function Settings() {
-  const [selectedTheme, setSelectedTheme] = useState("blue")
-  const [selectedFont, setSelectedFont] = useState("inter")
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
-  const navigate = useNavigate()
+  const [selectedTheme, setSelectedTheme] = useState('blue');
+  const [selectedFont, setSelectedFont] = useState('inter');
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const {colorScheme, fontFamily, setColorScheme, setFontFamily} = useTheme();
+  const navigate = useNavigate();
 
   const handleThemeChange = (themeId: string) => {
-    setSelectedTheme(themeId)
-    setHasUnsavedChanges(true)
-  }
+    setSelectedTheme(themeId);
+    setHasUnsavedChanges(true);
+  };
 
   const handleFontChange = (fontId: string) => {
-    setSelectedFont(fontId)
-    setHasUnsavedChanges(true)
-  }
+    setSelectedFont(fontId);
+    setHasUnsavedChanges(true);
+  };
 
   const handleSave = () => {
-    // Handle save logic here
-    console.log("Saving settings:", {
-      theme: selectedTheme,
-      font: selectedFont
-    })
-    setHasUnsavedChanges(false)
-  }
+    // Update theme and font
+    setColorScheme(selectedTheme);
+    setFontFamily(selectedFont);
+
+    // Show success message
+    toast.success('Settings saved successfully');
+    setHasUnsavedChanges(false);
+  };
 
   const handleReset = () => {
-    setSelectedTheme("blue")
-    setSelectedFont("inter")
-    setHasUnsavedChanges(false)
-  }
+    setSelectedTheme('blue');
+    setSelectedFont('inter');
+    setHasUnsavedChanges(false);
+  };
 
   const handleBack = () => {
     if (hasUnsavedChanges) {
       const confirmLeave = window.confirm(
-        "You have unsaved changes. Are you sure you want to leave?"
-      )
-      if (!confirmLeave) return
+        'You have unsaved changes. Are you sure you want to leave?',
+      );
+      if (!confirmLeave) return;
     }
     // Navigate back to dashboard
-    navigate("/")
-  }
+    navigate('/');
+  };
+
+  useEffect(() => {
+    setSelectedTheme(colorScheme);
+    setSelectedFont(fontFamily);
+  }, [colorScheme, fontFamily]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -238,8 +152,8 @@ export default function Settings() {
                     key={theme.id}
                     className={`relative p-4 rounded-lg border-2 cursor-pointer transition-all ${
                       selectedTheme === theme.id
-                        ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
-                        : "border-gray-200 hover:border-gray-300"
+                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                        : 'border-gray-200 hover:border-gray-300'
                     }`}
                     onClick={() => handleThemeChange(theme.id)}
                   >
@@ -289,8 +203,8 @@ export default function Settings() {
                     key={font.id}
                     className={`relative p-4 rounded-lg border-2 cursor-pointer transition-all ${
                       selectedFont === font.id
-                        ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
-                        : "border-gray-200 hover:border-gray-300"
+                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                        : 'border-gray-200 hover:border-gray-300'
                     }`}
                     onClick={() => handleFontChange(font.id)}
                   >
@@ -305,7 +219,7 @@ export default function Settings() {
                           {font.name}
                         </h3>
                         <Badge variant="outline" className="text-xs">
-                          {font.className.replace("font-", "")}
+                          {font.className.replace('font-', '')}
                         </Badge>
                       </div>
                       <p className="text-sm text-muted-foreground">
@@ -337,5 +251,5 @@ export default function Settings() {
         </div>
       </main>
     </div>
-  )
+  );
 }
