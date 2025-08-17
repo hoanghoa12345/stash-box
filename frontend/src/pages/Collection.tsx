@@ -124,8 +124,8 @@ export default function Collection() {
       <SidebarInset>
         <AppHeader selectedCollection={collection?.data} />
 
-        <div className="flex-1 p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="flex-1 p-6 max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {isLoading ? (
               <>
                 {Array.from({ length: 8 }).map((_, index) => (

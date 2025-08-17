@@ -66,10 +66,6 @@ const AppHeader = ({ selectedCollection }: AppHeaderProps) => {
           <Plus className="!size-5" />
           <span className="text-base">New</span>
         </Button>
-        {/* <Button variant="outline" size="sm">
-          <Calendar className="size-4 mr-2" />
-          Recent
-        </Button> */}
         <UserMenu
           userName={user?.name}
           userEmail={user?.email}

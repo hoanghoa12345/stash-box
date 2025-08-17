@@ -1,7 +1,7 @@
 import { ICollection } from '@/types';
 import { SidebarMenuButton, SidebarMenuItem } from '../ui/sidebar';
-import { Badge } from '../ui/badge';
 import { MoreOptionMenu } from './menu';
+import { cn } from '@/lib/utils';
 
 type SidebarItemProps = {
   collection: ICollection;
@@ -20,25 +20,25 @@ const SidebarItem = ({
 }: SidebarItemProps) => {
   return (
     <SidebarMenuItem key={collection.id}>
-      <SidebarMenuButton
-        isActive={isActive}
-        className="group w-full justify-between"
-      >
+      <SidebarMenuButton isActive={isActive} className="w-full justify-between">
         <div className="flex space-x-2 w-full" role="button" onClick={onClick}>
           <div className="flex size-6 items-center justify-center rounded">
             {collection.icon || '📄'}
           </div>
-          <span className="flex-1">{collection.name}</span>
+          <span className="flex-1 text-base md:text-sm">{collection.name}</span>
         </div>
-        <div className="flex space-x-2 w-16">
+        <div className="flex gap-1">
           <MoreOptionMenu
-            className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out"
+            className={cn(
+              'opacity-0 group-hover/menu-item:opacity-100 transition-opacity duration-150 ease-in-out',
+              isActive && 'opacity-100',
+            )}
             onEdit={() => onEdit?.(collection)}
             onDelete={() => onDelete?.(collection)}
           />
-          <Badge variant="secondary" className="ml-auto">
+          <div className="w-8 overflow-x-hidden text-right text-base px-1 md:text-sm text-muted-foreground">
             {collection.total_posts || 0}
-          </Badge>
+          </div>
         </div>
       </SidebarMenuButton>
     </SidebarMenuItem>

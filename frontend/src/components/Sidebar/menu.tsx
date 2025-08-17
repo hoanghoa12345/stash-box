@@ -5,7 +5,7 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
 import { ActionMenuItem } from "@/components/ui/dropdown-menu-item"
-import { MoreVertical, Pencil, Trash2 } from "lucide-react"
+import { MoreHorizontal, Pencil, Trash2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface MoreOptionMenuProps {
@@ -35,12 +35,12 @@ export const MoreOptionMenu: FC<MoreOptionMenuProps> = ({
         <div
           role="button"
           className={cn(
-            "inline-flex items-center justify-center rounded-md p-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50",
+            "inline-flex items-center justify-center rounded-lg p-1 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 hover:bg-blue-200 dark:hover:bg-blue-700",
             className
           )}
           aria-label="Open menu"
         >
-          <MoreVertical className="h-4 w-4" />
+          <MoreHorizontal className="h-4 w-4" />
         </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent align={align} side={side} className="min-w-[160px]">

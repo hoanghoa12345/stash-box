@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 const CardSkeleton = () => {
   return (
     <>
-      <div role="status" className="rounded-xl border overflow-hidden">
+      <div role="status" className="rounded-xl border overflow-hidden min-w-[16rem]">
         <Skeleton className="aspect-video overflow-hidden" />
         <div className="flex flex-col space-y-1.5 p-6 pb-2">
           <div className="flex items-start justify-between gap-2">
