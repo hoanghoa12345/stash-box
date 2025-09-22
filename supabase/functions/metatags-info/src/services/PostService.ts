@@ -3,6 +3,7 @@ import { log, logErr } from "../utils/logger.ts";
 import { type Post, PostType, PostUpdate } from "../models/Post.ts";
 import MetaTagService from "./MetaTagService.ts";
 import { stringToSlug } from "../utils/helpers.ts";
+import { QueryArguments } from "jsr:@db/postgres";
 
 const databaseUrl = Deno.env.get("SUPABASE_DB_URL") ?? "";
 
@@ -15,14 +16,13 @@ class PostService {
     isUnCategorized: boolean = false,
     filter: string = "",
     offset: number = -1,
-    limit: number = 50,
+    limit: number = 50
   ) {
     const connection = await this.pool.connect();
-    let query =
-      `SELECT p.id, p.user_id, title, SUBSTRING("content" FROM 1 FOR 200) AS "content", image_url, link, collection_id,
+    let query = `SELECT p.id, p.user_id, title, SUBSTRING("content" FROM 1 FOR 200) AS "content", image_url, link, collection_id,
       p.created_at, p.updated_at, "type", "order", c."name" as "collection_name" FROM sb_posts AS p
       LEFT JOIN sb_collections AS c ON p.collection_id = c.id WHERE p.user_id = $USER_ID`;
-    const params: any = { user_id: userId };
+    const params: QueryArguments = { user_id: userId };
 
     if (collectionId) {
       query += " AND collection_id = $COLLECTION_ID";
@@ -62,7 +62,7 @@ class PostService {
     collectionId: string | null = null,
     userId: string = "",
     imageUrl: string | null = null,
-    link: string | null = null,
+    link: string | null = null
   ) {
     const connection = await this.pool.connect();
     const post: Post = {
@@ -77,7 +77,7 @@ class PostService {
     post.order = await connection
       .queryObject<{ "?column?": number }>(
         `SELECT COALESCE(MAX("order"), 0) + 1 FROM sb_posts WHERE user_id = $1 AND collection_id = $2`,
-        [userId, collectionId],
+        [userId, collectionId]
       )
       .then((res) => res.rows[0]["?column?"] || 0);
 
@@ -98,8 +98,7 @@ class PostService {
     post.updated_at = post.created_at;
     post.image_original_url = image_original_url;
 
-    const query =
-      `INSERT INTO sb_posts (user_id, title, content, collection_id, created_at, updated_at, image_url, link, type, "order", image_original_url) 
+    const query = `INSERT INTO sb_posts (user_id, title, content, collection_id, created_at, updated_at, image_url, link, type, "order", image_original_url) 
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *`;
 
     const params = [
@@ -132,7 +131,7 @@ class PostService {
     const connection = await this.pool.connect();
     const result = await connection.queryObject<Post>(
       "SELECT * FROM sb_posts WHERE id = $1 AND deleted_at IS NULL",
-      [id],
+      [id]
     );
     connection.release();
 
@@ -145,9 +144,31 @@ class PostService {
   }
 
   public static async update(id: string, data: PostUpdate) {
-    const inputContent = data.type === PostType.POST_TYPE_LINK || data.link
-      ? data.link || data.content
-      : data.content;
+    const connection = await this.pool.connect();
+    const query = `
+      UPDATE sb_posts
+      SET title = $1, content = $2, collection_id = $3, updated_at = NOW()
+      WHERE id = $4 AND deleted_at IS NULL
+      RETURNING *
+    `;
+    const params = [data.title, data.content, data.collection_id, id];
+
+    const result = await connection.queryObject<Post>(query, params);
+    connection.release();
+
+    if (result.rows.length === 0) {
+      log(`Post with ID ${id} not found or update failed`);
+      return { data: null, error: "Post not found or update failed" };
+    }
+
+    return { data: result.rows[0], error: null };
+  }
+
+  public static async replace(id: string, data: PostUpdate) {
+    const inputContent =
+      data.type === PostType.POST_TYPE_LINK || data.link
+        ? data.link || data.content
+        : data.content;
     const {
       type,
       title: computedTitle,
@@ -191,7 +212,7 @@ class PostService {
     const connection = await this.pool.connect();
     const result = await connection.queryObject<Post>(
       "UPDATE sb_posts SET deleted_at = NOW() WHERE id = $1 AND deleted_at IS NULL RETURNING *",
-      [id],
+      [id]
     );
     connection.release();
 
@@ -206,7 +227,7 @@ class PostService {
   public static async computePostData(
     title: string,
     content: string,
-    userId: string,
+    userId: string
   ) {
     const urlRegex = /(https?:\/\/)((\S+?\.|localhost:)\S+?)(?=\s|<|"|$)/;
     const matches = content.match(urlRegex) || [];
@@ -230,20 +251,21 @@ class PostService {
       const imagePath = await MetaTagService.uploadImageToBucket(
         ogImage,
         userId,
-        imageName,
+        imageName
       );
       const imageUrl = await MetaTagService.getPublicUrl(imagePath);
       return {
         type: PostType.POST_TYPE_LINK,
         title: metatags?.title || metatags?.["og:title"] || title,
-        content: metatags?.description ||
+        content:
+          metatags?.description ||
           metatags?.["og:description"] ||
           metatags?.["twitter:description"] ||
           content,
         link: url,
         image_url: imageUrl,
-        image_original_url: metatags?.["og:image"] ||
-          metatags?.["twitter:image"] || null,
+        image_original_url:
+          metatags?.["og:image"] || metatags?.["twitter:image"] || null,
       };
     } catch (error) {
       logErr(error as Error);

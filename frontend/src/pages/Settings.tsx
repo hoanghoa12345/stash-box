@@ -90,7 +90,7 @@ export default function Settings() {
                 </div>
               </div>
             </div>
-            <div className="hidden mb:flex items-center gap-2">
+            <div className="hidden md:flex items-center gap-2">
               <Button variant="outline" size="sm" onClick={handleReset}>
                 Reset
               </Button>
@@ -237,7 +237,7 @@ export default function Settings() {
         </div>
 
         {/* Mobile Action Buttons */}
-        <div className="mt-8 flex flex-col sm:flex-row gap-3 sm:hidden">
+        <div className="mt-8 flex flex-col sm:flex-row gap-3 md:hidden">
           <Button
             onClick={handleSave}
             disabled={!hasUnsavedChanges}

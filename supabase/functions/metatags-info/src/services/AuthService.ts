@@ -122,6 +122,15 @@ class AuthService {
     return result.rows[0] || null;
   }
 
+  static async getUserIdentity(authUserId: string) {
+    const query = `
+    SELECT provider_name, provider_user_id, auth_user_id
+    FROM oauth_identities
+    WHERE auth_user_id = $1`;
+    const result = await this.db.query<IOAuthIdentity>(query, [authUserId]);
+    return result.rows[0] || null;
+  }
+
   public static getUser(token: string) {
     return this.supabaseClient.auth.getUser(token);
   }

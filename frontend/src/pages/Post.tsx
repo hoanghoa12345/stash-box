@@ -358,7 +358,7 @@ export default function PostDetail() {
         )}
 
         {/* Action Buttons (Mobile) */}
-        <div className="mt-6 flex flex-col sm:flex-row gap-3 sm:hidden px-2">
+        <div className="mt-6 flex flex-col sm:flex-row gap-3 md:hidden px-2">
           <Button
             onClick={handleSave}
             disabled={!content.trim()}

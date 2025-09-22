@@ -15,7 +15,7 @@ import { MoreOptionMenu } from './menu';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import placeholderImage from '@/assets/images/document-folders.svg';
+import placeholderImage from '@/assets/images/placeholder.png';
 
 export enum PostType {
   POST_TYPE_TEXT = 1,
@@ -64,7 +64,7 @@ const LinkCard = forwardRef<HTMLDivElement, LinkCardProps>(
             <div className="aspect-video overflow-hidden">
               <img
                 src={card.image_url ? card.image_url : placeholderImage}
-                alt={card.title}
+                alt="Post image"
                 className="size-full object-cover group-hover:scale-105 transition-transform duration-200"
               />
             </div>

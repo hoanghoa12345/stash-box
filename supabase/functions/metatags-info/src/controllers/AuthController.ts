@@ -268,7 +268,7 @@ class AuthController {
 
   public static async signOut(ctx: Context) {
     const user = ctx.state.user;
-    const userIdentifier = await AuthService.getOAuthIdentity(user.id);
+    const userIdentifier = await AuthService.getUserIdentity(user.id);
 
     if (!userIdentifier) {
       response(ctx, 401, "User not found");

@@ -130,6 +130,48 @@ class PostController {
     }
   }
 
+  public static async replace(ctx: RouterContext<string>) {
+    const body = ctx.request.body;
+    try {
+      const jsonBody = await body.json();
+      const { post_id } = ctx.params;
+
+      if (!post_id) {
+        response(ctx, 400, "Post Id is required");
+        return;
+      }
+
+      const { title, content, collectionId, imageUrl, link, type } = jsonBody;
+
+      if (!title || !content) {
+        response(ctx, 400, "Title and content are required");
+        return;
+      }
+
+      const userId = ctx.state.user.id;
+      const updateData: PostUpdate = {
+        user_id: userId,
+        title,
+        content,
+        collection_id: collectionId || null,
+        image_url: imageUrl || null,
+        link: link || null,
+        type,
+      };
+      const result = await PostService.replace(post_id, updateData);
+
+      if (result.error) {
+        response(ctx, 400, result.error);
+        return;
+      }
+
+      response(ctx, 200, "Post updated successfully!", result.data);
+    } catch (error) {
+      log(error);
+      response(ctx, 500, "Internal server error", error);
+    }
+  }
+
   public static async destroy(ctx: RouterContext<string>) {
     const { post_id } = ctx.params;
     if (!post_id) {
