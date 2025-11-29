@@ -43,11 +43,10 @@ class AuthController {
     const storedState = await AuthService.getOAuthState(state);
     if (!storedState || BigInt(Date.now()) - storedState.timestamp > 600000) {
       // 10 minutes
+      await AuthService.deleteOAuthState(state);
       response(ctx, 400, "Invalid or expired state");
       return;
     }
-
-    await AuthService.deleteOAuthState(state);
 
     const rows = await AuthService.getOAuthConfig();
     const authConfig = rows[0].value;
@@ -106,12 +105,18 @@ class AuthController {
         await AuthService.storeOAuthIdentity(userData.sub, authConfig.provider);
       }
       if (!userIdentifier.auth_user_id) {
+        await AuthService.updateOAuthState(state, userData.sub);
         response(
           ctx,
-          400,
-          "Authorized user id not set. Please contact the admin."
+          403,
+          "Authorized user not found. Please try to link with your account.",
+          {
+            error_code: "authorized_user_not_found",
+          }
         );
         return;
+      } else {
+        await AuthService.deleteOAuthState(state);
       }
 
       // Create JWT for our application
@@ -334,6 +339,55 @@ class AuthController {
         error: "Sign out partially failed, but local session cleared",
         timestamp: new Date().toISOString(),
       };
+    }
+  }
+
+  public static async linkOAuthAccount(ctx: Context) {
+    const body = ctx.request.body;
+    const { state, email, password } = await body.json();
+    const { validatedData, error, message } = signInValidation({
+      email,
+      password,
+    });
+
+    if (error || !validatedData || !state) {
+      response(ctx, 400, "", message);
+      return;
+    }
+    try {
+      const { data, error } = await AuthService.signIn(
+        validatedData.email,
+        validatedData.password
+      );
+      if (error) {
+        logErr(error);
+        response(ctx, 400, error.message);
+        return;
+      }
+      const rows = await AuthService.getOAuthConfig();
+      const authConfig = rows[0].value;
+      const storedState = await AuthService.getOAuthState(state);
+      if (
+        !storedState ||
+        BigInt(Date.now()) - storedState.timestamp > 600000 ||
+        !storedState.user_id
+      ) {
+        // 10 minutes
+        await AuthService.deleteOAuthState(state);
+        response(ctx, 400, "Invalid or expired state");
+        return;
+      }
+      await AuthService.linkOAuthAccount(
+        authConfig.provider,
+        storedState.user_id,
+        data.user.id
+      );
+      await AuthService.deleteOAuthState(state);
+      response(ctx, 200, "Link OAuth account successful!");
+    } catch (error) {
+      logErr(error);
+      response(ctx, 500, "Internal server error", error);
+      return;
     }
   }
 }

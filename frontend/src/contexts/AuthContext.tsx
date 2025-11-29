@@ -4,6 +4,8 @@ import Cookies from 'js-cookie';
 import axiosClient from '@/services/axiosClient';
 import { toast } from 'sonner';
 
+const COOKIE_EXPIRATION_DAYS = 7;
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -24,16 +26,6 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setIsLoading(false);
   }, []);
 
-  useEffect(() => {
-    if (token && user) {
-      Cookies.set('access_token', token, { expires: 7 });
-      Cookies.set('user_data', JSON.stringify(user), { expires: 7 });
-    } else {
-      Cookies.remove('access_token');
-      Cookies.remove('user_data');
-    }
-  }, [token, user]);
-
   const login = async () => {
     try {
       setIsLoading(true);
@@ -47,6 +39,17 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       setIsLoading(false);
       toast.error('Login failed. Please try again.');
     }
+  };
+
+  const setUserToken = (user: User, token: string) => {
+    setUser(user);
+    setToken(token);
+    Cookies.set('access_token', token, {
+      expires: COOKIE_EXPIRATION_DAYS,
+    });
+    Cookies.set('user_data', JSON.stringify(user), {
+      expires: COOKIE_EXPIRATION_DAYS,
+    });
   };
 
   const logout = async () => {
@@ -66,7 +69,9 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, isLoading }}>
+    <AuthContext.Provider
+      value={{ user, token, login, setUserToken, logout, isLoading }}
+    >
       {children}
     </AuthContext.Provider>
   );

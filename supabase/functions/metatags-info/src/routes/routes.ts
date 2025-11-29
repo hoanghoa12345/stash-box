@@ -21,6 +21,7 @@ router.get("/user", auth, AuthController.getUser);
 router.get("/profile", auth, AuthController.getProfile);
 router.post("/sign-out", auth, AuthController.signOut);
 router.post("/refresh-token", AuthController.refreshToken);
+router.post("/link-oauth-account", AuthController.linkOAuthAccount);
 
 router.get("/collections", auth, CollectionController.index);
 router.post("/collections", auth, CollectionController.store);

@@ -123,6 +123,7 @@ interface AuthContextType {
   user: User | null;
   token: string | null;
   login: () => Promise<void>;
+  setUserToken: (user: User, token: string) => void;
   logout: () => void;
   isLoading: boolean;
 }

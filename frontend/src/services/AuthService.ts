@@ -44,4 +44,17 @@ export class AuthService {
     const response = await axiosClient.get('/app');
     return response.data;
   }
+
+  public static async linkOAuthAccount({
+    state,
+    email,
+    password,
+  }: LoginRequest & { state: string }): Promise<DataResponse<void>> {
+    const response = await axiosClient.post('/link-oauth-account', {
+      state,
+      email,
+      password,
+    });
+    return response.data;
+  }
 }

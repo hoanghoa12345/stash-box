@@ -60,6 +60,15 @@ class AuthService {
     await this.db.query(query, [stateKey]);
   }
 
+  static async updateOAuthState(stateKey: string, userId: string) {
+    const query = `
+    UPDATE oauth_states
+    SET user_id = $2, updated_at = NOW()
+    WHERE state_key = $1
+  `;
+    await this.db.query(query, [stateKey, userId]);
+  }
+
   static async storeUserTokens(
     userId: string,
     accessToken: string,
@@ -129,6 +138,18 @@ class AuthService {
     WHERE auth_user_id = $1`;
     const result = await this.db.query<IOAuthIdentity>(query, [authUserId]);
     return result.rows[0] || null;
+  }
+
+  public static async linkOAuthAccount(
+    provider: string,
+    providerUserId: string,
+    authUserId: string
+  ) {
+    const query = `
+    UPDATE oauth_identities
+    SET auth_user_id = $1
+    WHERE provider_name = $2 AND provider_user_id = $3`;
+    await this.db.query(query, [authUserId, provider, providerUserId]);
   }
 
   public static getUser(token: string) {

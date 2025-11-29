@@ -161,34 +161,34 @@ export default function Collection() {
 
           {!isLoading ? (
             <>
-              {posts?.pages.map((group, i) => (
-                <React.Fragment key={i}>
-                  {group?.data.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-64 text-center">
-                      <Folder className="size-12 text-muted-foreground mb-4" />
-                      <h3 className="text-lg font-semibold mb-2">
-                        No items in this collection
-                      </h3>
-                      <p className="text-muted-foreground mb-4">
-                        Start by adding some resources to this collection.
-                      </p>
-                      <Button
-                        onClick={() =>
-                          navigate(
-                            `/post/create?collection_id=${
-                              collection?.data?.id || collectionId
-                            }`,
-                          )
-                        }
-                      >
-                        Add Item
-                      </Button>
-                    </div>
-                  ) : null}
-                </React.Fragment>
-              ))}
+              {posts?.pages[0].data.length === 0 && (
+                <div className="flex flex-col items-center justify-center h-64 text-center">
+                  <Folder className="size-12 text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">
+                    No items in this collection
+                  </h3>
+                  <p className="text-muted-foreground mb-4">
+                    Start by adding some resources to this collection.
+                  </p>
+                  <Button
+                    onClick={() =>
+                      navigate(
+                        `/post/create?collection_id=${
+                          collection?.data?.id || collectionId
+                        }`,
+                      )
+                    }
+                  >
+                    Add Item
+                  </Button>
+                </div>
+              )}
             </>
-          ) : null}
+          ) : (
+            <div className="text-center text-sm text-muted-foreground">
+              You have reached the end!
+            </div>
+          )}
           <DeleteAlert
             isOpen={isOpenDeleteAlert}
             onOpenChange={() => setIsOpenDeleteAlert(!isOpenDeleteAlert)}

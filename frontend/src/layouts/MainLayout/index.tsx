@@ -1,5 +1,10 @@
 import { useAuth } from '@/hooks/useAuth';
-import { Navigate, NavigateFunction, Outlet, useNavigate } from 'react-router-dom';
+import {
+  Navigate,
+  NavigateFunction,
+  Outlet,
+  useNavigate,
+} from 'react-router-dom';
 import { useEffect } from 'react';
 import logo from '@/assets/logo.svg';
 import { useQuery } from '@tanstack/react-query';
