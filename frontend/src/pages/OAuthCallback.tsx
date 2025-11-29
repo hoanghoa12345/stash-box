@@ -59,7 +59,6 @@ const OAuthCallback: React.FC = () => {
         <LinkUserAccountDialog
           open={isShowDialog}
           onOpenChange={handleCloseDialog}
-          initialData={error?.data}
         />
       </>
     );
