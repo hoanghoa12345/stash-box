@@ -159,9 +159,9 @@ export default function Collection() {
             <>{isFetchingNextPage && <CardSkeleton />}</>
           </div>
 
-          {!isLoading ? (
+          {!isLoading && (
             <>
-              {posts?.pages[0].data.length === 0 && (
+              {posts?.pages[0].data.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-64 text-center">
                   <Folder className="size-12 text-muted-foreground mb-4" />
                   <h3 className="text-lg font-semibold mb-2">
@@ -182,12 +182,14 @@ export default function Collection() {
                     Add Item
                   </Button>
                 </div>
+              ) : (
+                <div className="flex items-center justify-center pt-4">
+                  <div className="text-center text-sm text-muted-foreground">
+                    You have reached the end!
+                  </div>
+                </div>
               )}
             </>
-          ) : (
-            <div className="text-center text-sm text-muted-foreground">
-              You have reached the end!
-            </div>
           )}
           <DeleteAlert
             isOpen={isOpenDeleteAlert}
