@@ -22,6 +22,7 @@ import { handleError } from '@/utils';
 import { DeleteAlert } from '../Alert/DeleteAlert';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '../ui/button';
+import logo from '@/assets/logo.svg';
 
 const unCategorized: ICollection = {
   id: null,
@@ -182,15 +183,12 @@ const AppSidebar = () => {
     <>
       <Sidebar>
         <SidebarHeader className="bg-background">
-          <div className="flex items-center gap-2 px-4 py-2">
-            <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <Folder className="size-4" />
-            </div>
+          <div className="flex items-center gap-2 px-2 py-2">
+            <img src={logo} alt="Stash Box" className="size-8" />
             <div className="flex flex-col">
-              <span className="text-sm font-semibold">Collections</span>
-              <span className="text-xs text-muted-foreground">
-                Organize your resources
-              </span>
+              <h2 className="text-lg font-medium tracking-tight">
+                Stash Box
+              </h2>
             </div>
           </div>
         </SidebarHeader>

@@ -130,10 +130,8 @@ class PostController {
     }
   }
 
-  public static async replace(ctx: RouterContext<string>) {
-    const body = ctx.request.body;
+  public static async refetchMetadata(ctx: RouterContext<string>) {
     try {
-      const jsonBody = await body.json();
       const { post_id } = ctx.params;
 
       if (!post_id) {
@@ -141,24 +139,17 @@ class PostController {
         return;
       }
 
-      const { title, content, collectionId, imageUrl, link, type } = jsonBody;
-
-      if (!title || !content) {
-        response(ctx, 400, "Title and content are required");
+      const userId = ctx.state.user.id;
+      const post = await PostService.show(post_id);
+      if (post.error) {
+        response(ctx, 400, post.error);
         return;
       }
-
-      const userId = ctx.state.user.id;
-      const updateData: PostUpdate = {
-        user_id: userId,
-        title,
-        content,
-        collection_id: collectionId || null,
-        image_url: imageUrl || null,
-        link: link || null,
-        type,
-      };
-      const result = await PostService.replace(post_id, updateData);
+      if (post.data.user_id !== userId) {
+        response(ctx, 400, "You are not authorized to update this post");
+        return;
+      }
+      const result = await PostService.refetchMetadata(post_id, post.data);
 
       if (result.error) {
         response(ctx, 400, result.error);

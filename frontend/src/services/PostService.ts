@@ -1,40 +1,40 @@
-import { DataResponse, Post, PostCreateData, PostUpdateData } from "@/types"
-import axiosClient from "./axiosClient"
+import { DataResponse, Post, PostCreateData, PostUpdateData } from '@/types';
+import axiosClient from './axiosClient';
 
 export class PostService {
   public static async getPosts({
-    collectionId = "",
+    collectionId = '',
     isUnCategorized = false,
-    filter = "",
+    filter = '',
     offset = -1,
-    limit = 50
+    limit = 50,
   }): Promise<DataResponse<Post[]>> {
-    const response = await axiosClient.get("/posts", {
+    const response = await axiosClient.get('/posts', {
       params: {
         collection_id: collectionId,
         is_uncategorized: isUnCategorized,
         filter,
         offset,
-        limit
-      }
-    })
-    return response.data
+        limit,
+      },
+    });
+    return response.data;
   }
 
   public static async createPost(
-    postData: PostCreateData
+    postData: PostCreateData,
   ): Promise<DataResponse<Post>> {
-    const response = await axiosClient.post("/posts", postData)
-    return response.data
+    const response = await axiosClient.post('/posts', postData);
+    return response.data;
   }
 
   public static async getPost({
-    id
+    id,
   }: {
-    id: string
+    id: string;
   }): Promise<DataResponse<Post>> {
-    const response = await axiosClient.get(`/posts/${id}`)
-    return response.data
+    const response = await axiosClient.get(`/posts/${id}`);
+    return response.data;
   }
 
   public static async updatePost({
@@ -43,7 +43,7 @@ export class PostService {
     content,
     collectionId,
     imageUrl,
-    link
+    link,
   }: PostUpdateData): Promise<DataResponse<Post>> {
     const response = await axiosClient.put(`/posts/${id}`, {
       id,
@@ -51,17 +51,26 @@ export class PostService {
       content,
       collectionId,
       imageUrl,
-      link
-    })
-    return response.data
+      link,
+    });
+    return response.data;
   }
 
   public static async deletePost({
-    id
+    id,
   }: {
-    id: string
+    id: string;
   }): Promise<DataResponse<Post>> {
-    const response = await axiosClient.delete(`/posts/${id}`)
-    return response.data
+    const response = await axiosClient.delete(`/posts/${id}`);
+    return response.data;
+  }
+
+  public static async refetchMetadata({
+    id,
+  }: {
+    id: string;
+  }): Promise<DataResponse<Post>> {
+    const response = await axiosClient.put(`/posts/${id}/refetch-metadata`);
+    return response.data;
   }
 }

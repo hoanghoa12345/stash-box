@@ -164,7 +164,7 @@ class PostService {
     return { data: result.rows[0], error: null };
   }
 
-  public static async replace(id: string, data: PostUpdate) {
+  public static async refetchMetadata(id: string, data: PostUpdate) {
     const inputContent =
       data.type === PostType.POST_TYPE_LINK || data.link
         ? data.link || data.content

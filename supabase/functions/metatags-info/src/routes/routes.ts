@@ -33,7 +33,11 @@ router.get("/posts", auth, PostController.index);
 router.get("/posts/:post_id", auth, PostController.show);
 router.post("/posts", auth, PostController.store);
 router.put("/posts/:post_id", auth, PostController.update);
-router.put("/posts/:post_id/replace", auth, PostController.replace);
+router.put(
+  "/posts/:post_id/refetch-metadata",
+  auth,
+  PostController.refetchMetadata
+);
 router.delete("/posts/:post_id", auth, PostController.destroy);
 
 export default router;

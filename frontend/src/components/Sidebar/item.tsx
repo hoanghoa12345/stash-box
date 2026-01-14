@@ -22,10 +22,10 @@ const SidebarItem = ({
     <SidebarMenuItem key={collection.id}>
       <SidebarMenuButton isActive={isActive} className="w-full justify-between">
         <div className="flex space-x-2 w-full" role="button" onClick={onClick}>
-          <div className="flex size-6 items-center justify-center rounded">
+          <div className="flex size-4">
             {collection.icon || '📄'}
           </div>
-          <span className="flex-1 text-base md:text-sm">{collection.name}</span>
+          <span className="flex-1 text-sm font-medium">{collection.name}</span>
         </div>
         <div className="flex gap-1">
           <MoreOptionMenu
@@ -36,7 +36,7 @@ const SidebarItem = ({
             onEdit={() => onEdit?.(collection)}
             onDelete={() => onDelete?.(collection)}
           />
-          <div className="w-8 overflow-x-hidden text-right text-base px-1 md:text-sm text-muted-foreground">
+          <div className="w-8 overflow-x-hidden text-right text-sm px-1 text-muted-foreground">
             {collection.total_posts || 0}
           </div>
         </div>

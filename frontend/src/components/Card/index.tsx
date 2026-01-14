@@ -16,6 +16,8 @@ import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import placeholderImage from '@/assets/images/placeholder.png';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { PostService } from '@/services/PostService';
 
 export enum PostType {
   POST_TYPE_TEXT = 1,
@@ -32,6 +34,14 @@ type LinkCardProps = {
 const LinkCard = forwardRef<HTMLDivElement, LinkCardProps>(
   ({ card, className, onClick, onDelete }: LinkCardProps, ref) => {
     const navigate = useNavigate();
+    const queryClient = useQueryClient();
+
+    const mutation = useMutation({
+      mutationFn: PostService.refetchMetadata,
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['posts'] });
+      },
+    });
 
     const handleOpenLink = (e: React.MouseEvent) => {
       e.stopPropagation();
@@ -50,6 +60,14 @@ const LinkCard = forwardRef<HTMLDivElement, LinkCardProps>(
       navigate(editUrl);
     };
 
+    const handleRefreshMetadata = () => {
+      toast.promise(mutation.mutateAsync({ id: card.id }), {
+        loading: 'Refreshing metadata',
+        success: 'Metadata refreshed',
+        error: 'Failed to refresh metadata',
+      });
+    };
+
     return (
       <>
         <Card
@@ -64,8 +82,11 @@ const LinkCard = forwardRef<HTMLDivElement, LinkCardProps>(
             <div className="aspect-video overflow-hidden">
               <img
                 src={card.image_url ? card.image_url : placeholderImage}
-                alt="Post image"
+                alt={card.title}
                 className="size-full object-cover group-hover:scale-105 transition-transform duration-200"
+                onError={(e) => {
+                  e.currentTarget.src = placeholderImage;
+                }}
               />
             </div>
           )}
@@ -82,7 +103,11 @@ const LinkCard = forwardRef<HTMLDivElement, LinkCardProps>(
               >
                 {card.title}
               </CardTitle>
-              <MoreOptionMenu onEdit={handleEditPost} onDelete={onDelete} />
+              <MoreOptionMenu
+                onEdit={handleEditPost}
+                onRefreshMetadata={handleRefreshMetadata}
+                onDelete={onDelete}
+              />
             </div>
             <CardDescription className="text-sm line-clamp-2">
               {card.content}
