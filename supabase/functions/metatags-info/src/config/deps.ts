@@ -12,3 +12,5 @@ export type { SupabaseClient } from "jsr:@supabase/supabase-js@2.49.8";
 
 export { z } from "npm:zod@3.21.4";
 export { Pool } from "jsr:@db/postgres";
+
+export { create, verify } from "jsr:@zaubrik/djwt@^3.0.2";

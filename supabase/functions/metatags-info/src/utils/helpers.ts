@@ -1,4 +1,4 @@
-import { create, verify } from "@zaubrik/djwt";
+import { create, verify } from "../config/deps.ts";
 import { JWTPayload } from "../models/Auth.ts";
 
 const JWT_SECRET = Deno.env.get("JWT_SECRET") || "jwt-secret-key";

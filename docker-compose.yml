@@ -1,0 +1,11 @@
+services:
+  functions:
+    build: ./supabase
+    container_name: stashbox-functions
+    image: stashbox/functions:latest
+    volumes:
+      - ./supabase/functions:/app/functions
+    env_file:
+      - ./supabase/.env.local
+    ports:
+      - 8080:8080
