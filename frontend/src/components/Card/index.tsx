@@ -18,6 +18,7 @@ import { cn } from '@/lib/utils';
 import placeholderImage from '@/assets/images/placeholder.png';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { PostService } from '@/services/PostService';
+import LazyFadeImage from './LazyFadeImage';
 
 export enum PostType {
   POST_TYPE_TEXT = 1,
@@ -80,13 +81,11 @@ const LinkCard = forwardRef<HTMLDivElement, LinkCardProps>(
         >
           {card.type === PostType.POST_TYPE_LINK && (
             <div className="aspect-video overflow-hidden">
-              <img
-                src={card.image_url ? card.image_url : placeholderImage}
-                alt={card.title}
+              <LazyFadeImage
                 className="size-full object-cover group-hover:scale-105 transition-transform duration-200"
-                onError={(e) => {
-                  e.currentTarget.src = placeholderImage;
-                }}
+                src={card.image_url ? card.image_url : placeholderImage}
+                placeholderSrc={placeholderImage}
+                alt={card.title}
               />
             </div>
           )}
