@@ -1,4 +1,4 @@
-import { z } from "../config/deps.ts";
+import { z } from "../../config/deps.ts";
 
 type GetPostData = {
   collectionId?: string;

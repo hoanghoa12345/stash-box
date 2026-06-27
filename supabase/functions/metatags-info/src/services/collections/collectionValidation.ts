@@ -1,5 +1,5 @@
-import { z } from "../config/deps.ts";
-import { CollectionCreate, CollectionUpdate } from "../models/Collection.ts";
+import { z } from "../../config/deps.ts";
+import { CollectionCreate, CollectionUpdate } from "./types.ts";
 
 const CollectionCreateSchema = z.object({
   name: z.string().min(1),

@@ -5,7 +5,7 @@ import {
   IOAuthState,
   IUserToken,
 } from "../models/Auth.ts";
-import Database from "../utils/database.ts";
+import { Database } from "../utils/database.ts";
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
 const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";

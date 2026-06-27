@@ -1,15 +1,12 @@
-import { createClient, Pool, SupabaseClient } from "../config/deps.ts";
-import { DOMParser, Element } from "../config/deps.ts";
-import { uuid } from "../utils/helpers.ts";
-import { logErr } from "../utils/logger.ts";
+import { createClient, Pool, SupabaseClient } from "../../config/deps.ts";
+import { DOMParser, Element } from "../../config/deps.ts";
+import { uuid } from "../../utils/helpers.ts";
+import { logErr } from "../../utils/logger.ts";
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
 const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
-const databaseUrl = Deno.env.get("SUPABASE_DB_URL") ?? "";
-const environment = Deno.env.get("ENVIRONMENT") || "production";
 
-class MetaTagService {
-  private static pool = new Pool(databaseUrl, 3, true);
+export class MetaTagService {
   private static supabaseClient: SupabaseClient = createClient(
     supabaseUrl,
     supabaseKey
@@ -85,22 +82,4 @@ class MetaTagService {
       .getPublicUrl(imagePath);
     return data.publicUrl;
   }
-
-  public static async getAppInfo() {
-    const collection = await this.pool.connect();
-    const query = `SELECT key, value FROM sb_app_config WHERE is_public = true AND environment = $1;`;
-    const params = [environment];
-    const result = await collection.queryObject<{ key: string; value: string }>(
-      query,
-      params
-    );
-    collection.release();
-    const config = result.rows.reduce((acc, row) => {
-      acc[row.key] = row.value;
-      return acc;
-    }, {} as Record<string, unknown>);
-    return config;
-  }
 }
-
-export default MetaTagService;

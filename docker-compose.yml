@@ -5,6 +5,7 @@ services:
     image: stashbox/functions:latest
     volumes:
       - ./supabase/functions:/app/functions
+    working_dir: /app/functions/metatags-info
     env_file:
       - ./supabase/.env.local
     ports:

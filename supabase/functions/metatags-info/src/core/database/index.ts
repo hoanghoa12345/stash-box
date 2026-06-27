@@ -1,5 +1,5 @@
 import { QueryObjectResult } from "jsr:@db/postgres";
-import { Pool } from "../config/deps.ts";
+import { Pool } from "../../config/deps.ts";
 
 export class Database {
   private pool: Pool;
